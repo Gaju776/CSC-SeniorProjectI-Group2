@@ -6,6 +6,6 @@ Peer review Group 2
 - Dorcas Bwenge Gaju
 - Patience Divine Aimee Izere
 - Muhammad Tufail
-- Muhammed Miad
+- Mohammed Miad
   
 Instructor: Kurt Brown
