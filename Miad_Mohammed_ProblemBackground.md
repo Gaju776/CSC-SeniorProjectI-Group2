@@ -31,3 +31,7 @@ In the first place, I have no idea how frequently stampedes result in actual out
 
 Part 6: Early Risk
 The greatest risk involves evaluation. Since Vattani et al. (2015, p. 891) applied their method to a week's worth of actual request data obtained from a live website, I will not have access to such real traffic. As stampedes are influenced by request rate, recomputation time, and bursts, the results from artificial traffic may not reflect how a design performs in real situations, making it difficult to assess whether a project makes any improvement.
+
+Part 7: Connecting the Readings
+
+The article on different types of engineering design has caused a change in the way I now look at this project since mechanisms such as locking, leases, and early refresh are already in place; my task is therefore more one of selecting from among these or adapting one of them for a new situation rather than coming up with a new approach. From the section on researching existing solutions I adopted the idea that an existing solution might only require modification. That is why my table sets out what each approach does and where it stops, and I am not attempting to prove that any of them fails. As for the part on communication in capstone projects, I have taken note of the stress on verifying the need. I have recorded the fact that stampedes can overload a backend, but I have not established how frequently they result in actual outages, so I have listed this as a hypothesis and an open question.
