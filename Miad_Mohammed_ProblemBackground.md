@@ -9,3 +9,14 @@ The problem arises when a heavily requested item expires: every request arriving
 Part 2: Evidence
 
 As noted by Vattani et al. (2015, p. 886), the simultaneous recomputation following the expiry of a popular item can overload the backend and lead to a cascade effect. Moreover, caches that offer only simple get and set operations, for example Memcached, do not have built-in protection against stampedes (Nishtala et al. 2013, p. 388) and have provided measured production data showing that, for keys susceptible to thundering herds, the peak database query rate dropped from 17K queries per second without leases to 1.3K per second with leases, even though their definition includes a high level of both read and write activity rather than just expiry. With regard to Goodreads traffic and a one-minute recompute time, a uniform early-expiration baseline resulted in stampedes involving more than 80 and 50 processes respectively (Vattani et al., 2015, p. 892). I have neither observed nor measured any of this myself. I believe that stampedes cause outages frequently enough in typical applications for it to be significant, and that they are also important on a smaller scale, but neither of the papers makes any establishment of these points.
+
+Part 3: Existing Solutions
+
+There are three methods for dealing with the problem: locking, leasing, and probabilistic early refresh (see Table 1).
+
+Table 1. Existing approaches
+
+Approach	How It Addresses the Problem	Strengths	Limitations / Questions
+Cache locking (Nginx proxy_cache_lock)	One request fills a new cache item. Other requests wait (Nginx, n.d.).	It is widely used and includes only a few directives.	Waiters are delayed for a default period of up to 5 seconds before accessing the backend uncached (Nginx, n.d.). The behaviour with multiple servers is unknown.
+Leases (Facebook memcache)	A client receives a token so that it can refill a missing key, while the rest wait for a short time and then try again (Nishtala et al., 2013).	The peak rate of the database dropped from 17K/s to 1.3K/s on the keys that are prone to herd behaviour (Nishtala et al., 2013).	Facebook's custom stack is part of the solution; however, clients are still waiting.
+Probabilistic early expiration (XFetch)	Individual requests may be refreshed early, the likelihood increasing as the expiry date is approached (Vattani et al., 2015).	There was no need for locks or coordination, and in the tests there was no stampede larger than 8 when the recompute time was 10s.	The guarantee is probabilistic and has only been tested against a baseline of uniform delay.
