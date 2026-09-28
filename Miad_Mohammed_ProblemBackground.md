@@ -32,3 +32,10 @@ The greatest risk involves evaluation. Since Vattani et al. (2015, p. 891) appli
 
 Part 7: Connecting the Readings
 The article on different types of engineering design has caused a change in the way I now look at this project since mechanisms such as locking, leases, and early refresh are already in place; my task is therefore more one of selecting from among these or adapting one of them for a new situation rather than coming up with a new approach. From the section on researching existing solutions I adopted the idea that an existing solution might only require modification. As for the part on communication in capstone projects, I have taken note of the stress on verifying the need. I have recorded the fact that stampedes can overload a backend, but I have not established how frequently they result in actual outages, so I have listed this as a hypothesis and an open question.
+
+Bibliography:
+Module ngx_http_proxy_module. (2026). Nginx.Org. https://nginx.org/en/docs/http/ngx_http_proxy_module.html
+
+Rajesh Nishtala, Fugal, H., Grimm, S., Kwiatkowski, M., Lee, H., Li, H. C., McElroy, R., Paleczny, M., Peek, D., Saab, P., Stafford, D., Tung, T., & Venkateshwaran Venkataramani. (2013). Scaling Memcache at Facebook. 385–398.
+
+Vattani, A., Chierichetti, F., & Lowenstein, K. (2015). Optimal probabilistic cache stampede prevention. Proceedings of the VLDB Endowment, 8(8), 886–897. https://doi.org/10.14778/2757807.2757813
