@@ -8,8 +8,6 @@ Existing grid planning, operational, and stability assessment tools rely predomi
 
 In my research project, I address this fundamental gap by establishing a unified modeling, analysis, and control framework. My objective is to reveal and mathematically characterize how internal data center power electronics transform stochastic computing activity into the effective load dynamics and terminal impedance observed by the electric power grid.
 
----
-
 ## 2. Problem Definition & Operational Scope
 
 ### 2.1 Core Problem
@@ -33,8 +31,6 @@ To eliminate utility blind spots and bridge this dynamic disconnect, my research
   * Detailed computational fluid dynamics (CFD) of server room cooling and HVAC infrastructure.
   * Long-term multi-year transmission infrastructure expansion planning.
 
----
-
 ## 3. Stakeholder Impact Analysis
 
 | Stakeholder Group | Primary Challenge / Risk | Operational Consequence of Unmodeled Dynamics | How My Research Provides a Solution |
@@ -43,8 +39,6 @@ To eliminate utility blind spots and bridge this dynamic disconnect, my research
 | **Data Center Facility Engineers** | Uncharacterized interactions between compute bursts and internal power infrastructure. | Thermal stress on conversion stages, harmonic distortion, transient voltage sags across internal DC buses, and unexpected UPS trip events. | My model identifies internal converter resonances and stress points, enabling optimized UPS buffering and converter controller tuning. |
 | **Electric Utilities & Regulators** | Uncertainty during interconnection feasibility and impact studies. | Conservative interconnect limits, delayed approval timelines for data center interconnections, or risk of load curtailment. | I supply standardized dynamic impact tools that streamline interconnection approvals without compromising grid reliability. |
 | **Computing & AI System Architects** | Ignorance of grid-side electrical constraints when designing job schedulers. | Job execution delays, curtailment of cluster peak power capability, or operational inefficiency. | My framework provides power-aware feedback to workload schedulers, aligning GPU cluster bursts with grid operational limits. |
-
----
 
 ## 4. My Research Framework & The Three Technical Thrusts
 
@@ -82,15 +76,11 @@ To solve this problem systematically, I structure my research framework into thr
 ### Thrust 3: System-Level Stability & Control
 **My Solution Mechanism**: I apply system-level frequency-domain and time-domain stability criteria (such as Middlebrook impedance criteria and Lyapunov-based transient stability) to assess grid-data center dynamic interactions, predict resonance frequencies, and synthesize adaptive control strategies for grid voltage and frequency support.
 
----
-
 ## 5. Primary Research Questions & Key Scientific Uncertainties
 
 1. **Impedance Transformation Uncertainty**: How do multi-stage power electronic converter control loops and internal energy buffers transform high-frequency, non-stationary workload bursts into low-frequency dynamic load variations and time-varying impedance observed at the grid interface?
 2. **Model Reduction Trade-offs**: What is the optimal mathematical complexity for reduced-order power converter models that preserves non-linear transient phenomena and impedance interactions without creating computational intractability for large-scale grid simulations?
 3. **Control & Workload Resonances**: Under what workload scheduling conditions do bursty AI execution frequencies align with converter control loop bandwidths or grid resonance modes to trigger sub-synchronous or super-synchronous electrical oscillations?
-
----
 
 ## 6. Single-Student One-Semester Project Feasibility & Execution Roadmap
 
@@ -107,8 +97,6 @@ To demonstrate high rigor while keeping this research fully achievable within a 
 | **Phase 3: Integrated Simulation & Impedance Analysis** | W7–W9 | Interconnect stochastic workload profiles with converter models. Compute frequency-dependent input impedance Z_in(f) under dynamic operating points. | Derives the dynamic impedance Z_in(f) that reveals how internal power electronics reshape compute bursts. |
 | **Phase 4: Grid Stability & Scenario Sweeps** | W10–W12 | Evaluate grid interaction against single-machine infinite-bus grid model. Perform Monte Carlo sweeps across workload burst frequencies and control loop bandwidths. | Tests grid stability margins and identifies resonance conditions between compute tasks and grid modes. |
 | **Phase 5: Synthesis & Technical Reporting** | W13–W14 | Synthesize results comparing static ZIP models against my proposed dynamic framework. Write final thesis report and present findings. | Proves the superiority of my dynamic framework over traditional static models for utility planning. |
-
----
 
 ## 7. References & Foundational Frameworks
 
