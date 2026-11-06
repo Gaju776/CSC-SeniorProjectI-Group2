@@ -7,14 +7,14 @@
 **Friday commit deadline:** November 6, 2026, at 11:59 p.m. New York time  
 **Monday presentation:** November 9, 2026, at 6:30 p.m. New York time  
 **Last updated:** November 5, 2026  
-**Document status:** Proposed  
+**Document status:** Revised and Ready for Review  
 
 ---
 
 #### Progress note
-During Assignment 1, I refined the project focus from general grid telemetry delays to the dynamic impact of hyperscale AI data center power electronics on electric grid stability. Literature synthesis revealed that utilities rely on static ZIP load models, which fail to capture rapid, workload-driven power transients and time-varying converter input impedance $Z_{in}(f)$. To address this gap, I derived initial reduced-order state-space equations for a three-stage converter system (AC/DC rectifier, DC-DC stage, and UPS buffer) and structured a stochastic AI workload profile generator using Python and SimPy. The main unresolved issue is establishing the optimal mathematical model complexity that preserves critical switching non-linearities without causing computational intractability during grid dynamic simulations. My immediate next step is formulating explicit input-output interfaces and requirements for Assignment 2.
+During Assignment 1, I refined the project focus from general grid telemetry transport delays to the dynamic electrical impact of hyperscale AI data center power electronics on electric grid stability. Literature synthesis revealed that regional grid operators rely on static ZIP load models, which fail to capture rapid, workload-driven power transients and time-varying converter input impedance $Z_{in}(f)$. To eliminate this visibility gap, I derived initial reduced-order state-space dynamic equations for a three-stage converter system (AC/DC rectifier, DC-DC buck stage, and UPS battery buffer) and structured a stochastic AI workload profile generator using Python and SimPy. The main unresolved issue is establishing the optimal mathematical model complexity that preserves critical switching non-linearities without causing computational intractability during large-scale grid dynamic simulations. My immediate next step is formulating explicit input-output interfaces and testable requirements for Assignment 2.
 
-**Open question:** Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes?
+**Open question:** Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes to induce voltage sags?
 
 ---
 
@@ -37,7 +37,7 @@ During Assignment 1, I refined the project focus from general grid telemetry del
 #### 1 Problem research and scope
 
 ##### Problem and affected people
-The rapid deployment of artificial intelligence (AI) training clusters, hyperscale cloud facilities, and high-density compute infrastructure is driving unprecedented localized electricity demand spikes across electric power grids. While data centers are among the largest single-point electrical loads connected to transmission and distribution networks, regional transmission operators (RTOs) and independent system operators (ISOs) do not directly observe raw computing task activity. Instead, compute power demand ($\Delta P_{compute}$) is filtered, buffered, and reshaped by internal data center power conversion stages—including AC/DC rectifiers, intermediate DC-DC converters, fast closed-loop feedback controllers, and local energy storage buffers (Uninterruptible Power Supplies and battery banks)—before reaching the Point of Common Coupling (PCC) at the utility grid interface.
+The rapid proliferation of artificial intelligence (AI) training clusters, hyperscale cloud facilities, and high-density compute infrastructure is driving unprecedented localized electricity demand spikes across electric power grids. While data centers represent some of the largest single-point electrical loads connected to transmission and distribution networks, regional transmission operators (RTOs) and independent system operators (ISOs) do not directly observe raw computing task activity. Instead, compute power demand ($\Delta P_{compute}$) is filtered, buffered, and reshaped by internal data center power conversion stages—including AC/DC rectifiers, intermediate DC-DC converters, fast closed-loop feedback controllers, and local energy storage buffers (Uninterruptible Power Supplies and battery/supercapacitor banks)—before reaching the Point of Common Coupling (PCC) at the utility grid interface.
 
 Traditional grid planning, dynamic security assessment, and interconnection tools rely almost exclusively on static or heavily simplified load representations, such as constant impedance ($Z$), constant current ($I$), and constant power ($P$) ZIP load models. These static models assume slow, smooth load variations and fail to capture rapid, workload-driven dynamic load swings, multi-stage power converter feedback loop interactions, and non-linear dynamic impedance characteristics. Consequently, unmodeled dynamic interactions between AI workload spikes and converter control loops create critical operational risks for four primary stakeholder groups:
 
@@ -54,7 +54,7 @@ Under current operational protocols, data center power interactions proceed thro
 3. **PCC Grid Point Injection:** The reshaped active and reactive power currents flow across the transformer interface at the PCC into the utility transmission network.
 4. **Utility Grid Model Evaluation:** Utility energy management systems evaluate grid stability using static ZIP load models, assuming constant power draw or static impedance.
 
-**The Failure Point:** Because static ZIP models ignore the converter closed-loop bandwidths and energy buffer dynamics, they treat the data center as a passive static load block. In reality, fast closed-loop voltage regulation causes the converter input impedance $Z_{in}(f)$ to exhibit negative incremental resistance characteristics at low frequencies. When AI workload burst frequencies align with converter control bandwidths or grid network resonance modes, the unmodeled dynamic impedance triggers severe voltage sags and electrical oscillations at the PCC that utility operators cannot predict or prevent.
+**The Failure Point:** Because static ZIP models ignore converter closed-loop bandwidths and energy buffer dynamics, they treat the data center as a passive static load block. In reality, fast closed-loop voltage regulation causes the converter input impedance $Z_{in}(f)$ to exhibit negative incremental resistance characteristics at low frequencies. When AI workload burst frequencies align with converter control bandwidths or grid network resonance modes, the unmodeled dynamic impedance triggers severe voltage sags and electrical oscillations at the PCC that utility operators cannot predict or prevent.
 
 ##### Concrete scenario
 A hyperscale data center hosting a 50,000-GPU cluster initiates a synchronous pipeline-parallel LLM training iteration. Within 5 milliseconds, compute power demand ramps by 20 MW. As server-side voltage drops, the fast closed-loop controllers of intermediate DC-DC converters increase current draw to maintain constant power delivered to the GPUs. Simultaneously, the central AC/DC rectifier draws a heavy step-current from the utility substation, while the facility's supercapacitor/UPS buffer kicks in to stabilize the internal 48V DC bus.
@@ -64,10 +64,10 @@ Because the regional grid operator's dynamic security software models the data c
 ##### Evidence and assumptions
 
 **Grounding Evidence:** This problem formulation and research framework are directly supported by foundational literature and industry standards:
-* *Power Distribution Topologies:* Pratt et al. (2007) document multi-stage data center power distribution architectures, establishing the role of switching converters and UPS buffers in reshaping load draws.
-* *Impedance Interaction Criteria:* Middlebrook (1976) formulated the foundational input filter impedance criteria, proving that switching regulator closed-loop feedback loops induce negative input resistance that causes sub-synchronous resonance when filter/grid impedance matches converter input impedance.
-* *Grid Interconnection Standards:* IEEE Standard 1547 and IEEE 2800 specify dynamic voltage/frequency ride-through and impedance stability requirements for inverter-based resources connected to utility grids.
-* *Federal Research Framework:* The National Science Foundation (NSF) Division of Electrical, Communications, and Computing Systems (ECCS) Energy, Power, Control, and Learning (EPCL) program (Solicitation NSF 26-514) explicitly prioritizes research into dynamic modeling, control, and stability of power-electronic-dominated energy systems.
+* *Power Distribution Topologies:* Pratt et al. (2007) document multi-stage data center power distribution architectures, establishing the role of switching converters and UPS buffers in reshaping load draws [2].
+* *Impedance Interaction Criteria:* Middlebrook (1976) formulated foundational input filter impedance criteria, proving that switching regulator closed-loop feedback loops induce negative input resistance that causes sub-synchronous resonance when filter/grid impedance matches converter input impedance [1].
+* *Grid Interconnection Standards:* IEEE Standard 1547 and IEEE 2800 specify dynamic voltage/frequency ride-through and impedance stability requirements for inverter-based resources connected to utility grids [3].
+* *Federal Research Framework:* The National Science Foundation (NSF) Division of Electrical, Communications, and Computing Systems (ECCS) Energy, Power, Control, and Learning (EPCL) program (Solicitation NSF 26-514) explicitly prioritizes research into dynamic modeling, control, and stability of power-electronic-dominated energy systems [4].
 
 **Explicitly Labeled Assumptions:**
 * *Assumption 1 (Grid Interface Representation):* The utility grid interface is initially modeled as a Single-Machine Infinite-Bus (SMIB) system with fixed nominal frequency (60 Hz) and known grid short-circuit impedance ($Z_{grid}$).
@@ -97,29 +97,29 @@ To maintain feasibility within a single-student academic project, the scope deli
 
 ##### Operational workflow diagram
 
-![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](assets/workflow_context.png)
+![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](workflow_context.png)
 
-*Figure 1. Operational workflow linking AI workload scheduling transients ($\Delta P_{compute}$), multi-stage converter regulation ($\Delta V, \Delta I, Z_{in}$), and grid interface stability ($V_{PCC}, f_{PCC}$).*
+*Figure 1. Operational workflow linking AI cluster workload scheduling transients ($\Delta P_{compute}$), multi-stage converter regulation ($\Delta V, \Delta I, Z_{in}$), and utility PCC grid interface stability ($V_{PCC}, f_{PCC}$).*
 
 ##### Stakeholder impact analysis
 
 | Stakeholder Group | Primary Challenge / Risk | Operational Consequence of Unmodeled Dynamics | Research Solution & Reference Link |
 | ------ | ------ | ------ | ------ |
-| **Grid Operators (ISOs / RTOs)** | Lack of dynamic load models for hyperscale data centers. | Incorrect voltage/frequency stability margins, unexpected tripping of grid protection relays, and unpredicted transient oscillations. | Supplies dynamic state-space load models and impedance profiles $Z_{in}(f)$ for dynamic security assessment [1] |
-| **Data Center Facility Engineers** | Uncharacterized interactions between compute bursts and internal power infrastructure. | Thermal stress on conversion stages, harmonic distortion, transient voltage sags across internal DC buses, and unexpected UPS trip events. | Identifies internal converter resonances and stress points to optimize UPS buffering and control tuning [2] |
-| **Electric Utilities & Regulators** | Uncertainty during interconnection feasibility and impact studies. | Conservative interconnect limits, delayed approval timelines for data center interconnections, or risk of load curtailment. | Provides standardized dynamic impact evaluation tools that streamline interconnection approvals [3] |
-| **Computing & AI System Architects** | Ignorance of grid-side electrical constraints when designing job schedulers. | Job execution delays, curtailment of cluster peak power capability, or operational inefficiency. | Delivers power-aware feedback to workload schedulers, aligning GPU cluster bursts with grid limits [4] |
+| **Grid Operators (ISOs / RTOs)** | Lack of dynamic load models for hyperscale data centers. | Incorrect voltage/frequency stability margins, unexpected tripping of grid protection relays, and unpredicted transient oscillations. | Supplies dynamic state-space load models and impedance profiles $Z_{in}(f)$ for dynamic security assessment [[1](#1-middlebrook-r-d-1976)] |
+| **Data Center Facility Engineers** | Uncharacterized interactions between compute bursts and internal power infrastructure. | Thermal stress on conversion stages, harmonic distortion, transient voltage sags across internal DC buses, and unexpected UPS trip events. | Identifies internal converter resonances and stress points to optimize UPS buffering and control tuning [[2](#2-pratt-a-kumar-p--aldridge-t-2007)] |
+| **Electric Utilities & Regulators** | Uncertainty during interconnection feasibility and impact studies. | Conservative interconnect limits, delayed approval timelines for data center interconnections, or risk of load curtailment. | Provides standardized dynamic impact evaluation tools that streamline interconnection approvals [[3](#3-ieee-power--energy-society-pes-2022)] |
+| **Computing & AI System Architects** | Ignorance of grid-side electrical constraints when designing job schedulers. | Job execution delays, curtailment of cluster peak power capability, or operational inefficiency. | Delivers power-aware feedback to workload schedulers, aligning GPU cluster bursts with grid limits [[4](#4-us-national-science-foundation-nsf-2026)] |
 
 ---
 
 #### 2 Requirements and system specification
-<!-- Work to come: Scheduled for Deliverable 2 (Commit: November 13, 2026; Presentation: November 16, 2026). -->
+<!-- Scheduled for Deliverable 2 (Commit: November 13, 2026; Presentation: November 16, 2026). -->
 
 | ID | Required behavior and conditions | Acceptance check | Design and test reference |
 | ------ | ------ | ------ | ------ |
 | F1 | Stochastic AI workload profile generation | SimPy process produces time-series power transients matching MMPP distribution | Scheduled for Deliverable 2 |
-| C1 | State-space converter model stability rule | Real part of system matrix eigenvalues Re(lambda_i) < 0 across operating points | Scheduled for Deliverable 2 |
-| Q1 | Terminal impedance calculation execution speed | Derive Z_{in}(f) across 0.1 Hz–10 kHz in < 5 seconds for 1000 time steps | Scheduled for Deliverable 2 |
+| C1 | State-space converter model stability rule | Real part of system matrix eigenvalues $Re(\lambda_i) < 0$ across operating points | Scheduled for Deliverable 2 |
+| Q1 | Terminal impedance calculation execution speed | Derive $Z_{in}(f)$ across 0.1 Hz–10 kHz in < 5 seconds for 1000 time steps | Scheduled for Deliverable 2 |
 
 **Inputs and outputs:** *Work to come in Deliverable 2.*  
 **Assumptions:** *Work to come in Deliverable 2.*  
@@ -128,12 +128,16 @@ To maintain feasibility within a single-student academic project, the scope deli
 ---
 
 #### 3 Alternatives and selected solution
-<!-- Work to come: Draft in Deliverable 2; complete in Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
+<!-- Draft in Deliverable 2; complete in Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
 
 | Approach and source | Useful behavior | Limitation | Evidence or assumption |
 | ------ | ------ | ------ | ------ |
-| Static ZIP Load Baseline | Low computational overhead; supported by legacy grid software | Fails to capture non-linear transients, switching feedback loops, and dynamic impedance Z_{in}(f) | Pratt et al. (2007) [2] |
-| Reduced-Order Dynamic State-Space (Selected) | Accurately models converter control loops, UPS buffering, and dynamic impedance | Requires state-space derivation and parameter tuning for converter stages | Middlebrook (1976) [1] |
+| Static ZIP Load Baseline | Low computational overhead; supported by legacy grid software | Fails to capture non-linear transients, switching feedback loops, and dynamic impedance $Z_{in}(f)$ | Pratt et al. (2007) [[2](#2-pratt-a-kumar-p--aldridge-t-2007)] |
+| Reduced-Order Dynamic State-Space (Selected) | Accurately models converter control loops, UPS buffering, and dynamic impedance | Requires state-space derivation and parameter tuning for converter stages | Middlebrook (1976) [[1](#1-middlebrook-r-d-1976)] |
+
+![Middlebrook Input Filter Impedance Interaction Criterion graph showing Z_grid(f) intersecting dynamic input impedance Z_in(f)](impedance_resonance.png)
+
+*Figure 2. Middlebrook Impedance Interaction Criterion highlighting the frequency-dependent divergence between dynamic state-space input impedance $Z_{in}(f)$, static ZIP load baseline $Z_{zip}$, and grid source impedance $Z_{grid}(f)$.*
 
 **Choice and reason:** *Work to come in Deliverable 3.*  
 
@@ -144,10 +148,17 @@ To maintain feasibility within a single-student academic project, the scope deli
 **Consequences:** Enables fast impedance derivation; high-frequency switching harmonics (>100 kHz) are averaged out.  
 **Status and revisit condition:** Proposed; revisit if switching transients distort low-frequency grid modes.  
 
+##### Decision 2
+**Context and requirement:** Integration of local UPS battery/supercapacitor buffer dynamics.  
+**Options:** Ideal constant voltage source vs. first-order RC energy buffer state model.  
+**Decision and reason:** First-order RC state model selected to capture transient DC-bus voltage dips during compute surges.  
+**Consequences:** Provides accurate state-of-charge (SOC) tracking without full electrochemical cell modeling complexity.  
+**Status and revisit condition:** Proposed; revisit if long-duration thermal degradation alters UPS discharge response.  
+
 ---
 
 #### 4 Architectural design
-<!-- Work to come: Scheduled for Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
+<!-- Scheduled for Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
 
 **Boundary and outside participants:** *Work to come in Deliverable 3.*  
 **Main parts and messages:** *Work to come in Deliverable 3.*  
@@ -157,13 +168,13 @@ To maintain feasibility within a single-student academic project, the scope deli
 ---
 
 #### 5 Component design and interfaces
-<!-- Work to come: Scheduled for Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
+<!-- Scheduled for Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
 
 | Component | Responsibility | Input | Output or state change |
 | ------ | ------ | ------ | ------ |
-| WorkloadGenerator | Simulates stochastic AI task dispatches | Task arrival rate lambda, burst magnitude Delta P | Time-series power demand array P_{compute}(t) |
-| ConverterStateSpace | Solves reduced-order dynamic equations | P_{compute}(t), duty cycle d(t) | Bus voltages V_{DC}(t), currents I(t), state vector x(t) |
-| ImpedanceAnalyzer | Computes frequency-dependent input impedance | Dynamic state trajectory x(t), grid frequency f | Input impedance magnitude and phase Z_{in}(f) |
+| WorkloadGenerator | Simulates stochastic AI task dispatches | Task arrival rate $\lambda$, burst magnitude $\Delta P$ | Time-series power demand array $P_{compute}(t)$ |
+| ConverterStateSpace | Solves reduced-order dynamic equations | $P_{compute}(t)$, duty cycle $d(t)$ | Bus voltages $V_{DC}(t)$, currents $I(t)$, state vector $x(t)$ |
+| ImpedanceAnalyzer | Computes frequency-dependent input impedance | Dynamic state trajectory $x(t)$, grid frequency $f$ | Input impedance magnitude and phase $Z_{in}(f)$ |
 
 **Critical operation:** *Work to come in Deliverable 3.*  
 **Output:** *Work to come in Deliverable 3.*  
@@ -173,12 +184,12 @@ To maintain feasibility within a single-student academic project, the scope deli
 ---
 
 #### 6 Data structure design
-<!-- Work to come: Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
+<!-- Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
 
 | Record or structure | Fields and example values | Relationships and rules | Persistence |
 | ------ | ------ | ------ | ------ |
 | WorkloadProfile | timestamp (float), power_mw (float), job_type (string) | Sequential time ordering; power_mw >= 0 | In-memory CSV array |
-| ConverterState | v_rect (float), v_dc (float), i_ind (float), soc_ups (float) | System differential state vector x(t) | Simulation run output file |
+| ConverterState | v_rect (float), v_dc (float), i_ind (float), soc_ups (float) | System differential state vector $x(t)$ | Simulation run output file |
 
 **Ownership:** *Work to come in Deliverable 4.*  
 **Invalid combinations:** *Work to come in Deliverable 4.*  
@@ -187,7 +198,7 @@ To maintain feasibility within a single-student academic project, the scope deli
 ---
 
 #### 7 Algorithm design and execution
-<!-- Work to come: Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
+<!-- Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
 
 ```
 ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqRange)
@@ -208,12 +219,12 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 ---
 
 #### 8 Failures and security
-<!-- Work to come: Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
+<!-- Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
 
 | Scenario | State that may survive | Expected behavior | Planned check |
 | ------ | ------ | ------ | ------ |
 | Extreme AI power step surge (>50 MW/ms) | DC-bus voltage rail saturation | UPS buffer max discharge engage; warning log issued | Simulation boundary stress test |
-| Numerical integration instability in ODE solver | Last valid state vector x(t_{valid}) | Adaptive step size reduction or solver fallback | SciPy solver exception trap |
+| Numerical integration instability in ODE solver | Last valid state vector $x(t_{valid})$ | Adaptive step size reduction or solver fallback | SciPy solver exception trap |
 
 **Selected adverse case for the prototype:** *Work to come in Deliverable 4.*  
 **Excluded conditions and consequences:** *Work to come in Deliverable 4.*  
@@ -235,7 +246,7 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 
 | Test and requirement | Setup and procedure | Expected result | Status and evidence |
 | ------ | ------ | ------ | ------ |
-| T1 Normal operation | Inject 10 MW 10-second workload step into 3-stage converter model | Converter voltages stabilize within 50 ms; Z_{in}(f) computed accurately | Planned for Deliverable 5 |
+| T1 Normal operation | Inject 10 MW 10-second workload step into 3-stage converter model | Converter voltages stabilize within 50 ms; $Z_{in}(f)$ computed accurately | Planned for Deliverable 5 |
 | T2 Correctness rule | Verify state-space system passivity and energy balance across UPS buffer | Total energy input equals sum of dissipated heat and stored buffer energy | Planned for Deliverable 5 |
 | T3 Off-nominal scenario | Apply 100 Hz workload burst matching LC filter natural frequency | Impedance analyzer detects negative resistance dip and flags resonance | Planned for Deliverable 5 |
 
@@ -256,6 +267,17 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 **Update and rollback:** *Work to come in Deliverable 6.*  
 **Responsible design:** *Work to come in Deliverable 6.*  
 
+| Risk | Early sign | Response or fallback |
+| ------ | ------ | ------ |
+| Workload burst rate exceeds solver time step limits | ODE integration convergence failure | Switch to stiff solver (SciPy `Radau` or `BDF`) |
+| Unmodeled switching harmonics distort low-frequency impedance | High-frequency voltage ripples at DC bus | Incorporate second-order parasitic switching model |
+
+| Semester II milestone | Dependency | Completion evidence | Essential or optional |
+| ------ | ------ | ------ | ------ |
+| Interconnect model with IEEE 9-bus grid system | Validated single-converter state-space model | Multi-bus voltage stability simulation runs | Essential |
+| Implement Lyapunov transient stability tool | Multi-bus grid interconnect framework | Dynamic security margin assessment reports | Essential |
+| Synthesize adaptive impedance-matching controller | Impedance resonance analysis engine | Closed-loop oscillation suppression demonstration | Optional |
+
 ---
 
 #### 12 Revision history and references
@@ -263,7 +285,8 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 ##### Revision history
 | Revision date | Change to my design | Reason and evidence |
 | ------ | ------ | ------ |
-| November 5, 2026 | Initial creation of Section 1 problem research, operational scope, concrete scenario, stakeholder impact table, workflow diagram, progress note, and Section 12 references. | Deliverable 1 submission for CSC 59866 6-week schedule requirement. |
+| November 5, 2026 (Initial) | Initial creation of Section 1 problem research, operational scope, concrete scenario, stakeholder impact table, workflow diagram, progress note, and Section 12 references. | Deliverable 1 submission for CSC 59866 6-week schedule requirement. |
+| November 5, 2026 (Revision) | Refined Section 1 problem formulation, added Middlebrook impedance interaction diagram (Figure 2), expanded stakeholder links, and updated Section 12 media listings. | Incorporated handbook visual diagram requirements and template alignment. |
 
 ##### Open questions
 | Open question | Why it matters | Next action |
@@ -274,14 +297,15 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 This design document synthesizes research and state-space modeling formulations authored by Patience Izere for CSC 59866. Python code development will reuse open-source libraries including SimPy (v4.1.2), NumPy, SciPy, and Control under standard academic license terms.
 
 ##### References
-1. **Middlebrook, R. D.** (1976). "Input Filter Considerations in Design and Application of Switching Regulators." *IEEE Power Electronics Specialists Conference (PESC)*, pp. 366–382.  
-2. **Pratt, A., Kumar, P., & Aldridge, T.** (2007). "Power Distribution Topologies for Modern Data Centers." *IEEE Transactions on Power Electronics*, vol. 22, no. 3, pp. 1012–1018.  
-3. **IEEE Power & Energy Society (PES)** (2022). *IEEE Standard 1547-2018 / IEEE Standard 2800-2022 for Interconnection and Interoperability of Distributed Energy Resources and Large Inverter-Based Resources*. IEEE.  
-4. **U.S. National Science Foundation (NSF)** (2026). Directorate for Engineering (ENG), Division of Electrical, Communications, and Computing Systems (ECCS). *Energy, Power, Control, and Learning (EPCL) Program Guidelines*. Solicitation NSF 26-514.  
-5. **SimPy Development Team** (2024). *SimPy: Process-based Discrete-Event Simulation Framework in Python (v4.1.2)*. SimPy Documentation.
+1. <a id="1-middlebrook-r-d-1976"></a>**Middlebrook, R. D.** (1976). "Input Filter Considerations in Design and Application of Switching Regulators." *IEEE Power Electronics Specialists Conference (PESC)*, pp. 366–382.  
+2. <a id="2-pratt-a-kumar-p--aldridge-t-2007"></a>**Pratt, A., Kumar, P., & Aldridge, T.** (2007). "Power Distribution Topologies for Modern Data Centers." *IEEE Transactions on Power Electronics*, vol. 22, no. 3, pp. 1012–1018.  
+3. <a id="3-ieee-power--energy-society-pes-2022"></a>**IEEE Power & Energy Society (PES)** (2022). *IEEE Standard 1547-2018 / IEEE Standard 2800-2022 for Interconnection and Interoperability of Distributed Energy Resources and Large Inverter-Based Resources*. IEEE.  
+4. <a id="4-us-national-science-foundation-nsf-2026"></a>**U.S. National Science Foundation (NSF)** (2026). Directorate for Engineering (ENG), Division of Electrical, Communications, and Computing Systems (ECCS). *Energy, Power, Control, and Learning (EPCL) Program Guidelines*. Solicitation NSF 26-514.  
+5. <a id="5-simpy-development-team-2024"></a>**SimPy Development Team** (2024). *SimPy: Process-based Discrete-Event Simulation Framework in Python (v4.1.2)*. SimPy Documentation.
 
 ##### Supporting media and evidence
-* **Workflow Diagram:** `assets/workflow_context.png` — Visual schematic illustrating the sequence from AI cluster workload dispatch through multi-stage power electronic conversion to utility PCC grid interface.
+* **Workflow Diagram (Figure 1):** `workflow_context.png` — Visual schematic illustrating the sequence from AI cluster workload dispatch through multi-stage power electronic conversion to utility PCC grid interface.
+* **Impedance Interaction Graph (Figure 2):** `impedance_resonance.png` — Technical plot illustrating the Middlebrook input filter impedance interaction criterion, contrasting dynamic state-space impedance $Z_{in}(f)$ against static ZIP models and grid source impedance $Z_{grid}(f)$.
 
 ##### Final document check
 * [x] Terms and examples make the project understandable to a beginner.
