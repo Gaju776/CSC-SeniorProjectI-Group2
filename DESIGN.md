@@ -1,6 +1,6 @@
 ### Your Project Design
 
-**Author:** Patience Izere  
+**Author:** Patience Divine Aimee IZERE  
 **Course:** CSC 59866  
 **Selected project and option:** Modeling, Analysis, and Control of Data Center Power Electronics Under AI Workload Dynamics (Single-Student Feasibility Investigation)  
 **Current assignment:** 1  
