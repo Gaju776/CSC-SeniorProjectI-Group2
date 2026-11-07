@@ -3,10 +3,6 @@
 **Author:** Patience Divine Aimee IZERE  
 **Course:** CSC 59866  
 **Selected project and option:** Modeling, Analysis, and Control of Data Center Power Electronics Under AI Workload Dynamics
-<<<<<<< HEAD
-
-=======
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 **Current assignment:** 1  
 **Friday commit deadline:** November 6, 2026, at 11:59 p.m. New York time  
 **Monday presentation:** November 9, 2026, at 6:30 p.m. New York time  
@@ -16,15 +12,9 @@
 ---
 
 #### Progress note
-<<<<<<< HEAD
-During Assignment 1, I refined the project focus from general grid telemetry transport delays to the dynamic electrical impact of hyperscale AI data center power electronics on electric grid stability. Literature synthesis revealed that regional grid operators rely on static ZIP load models, which fail to capture rapid, workload-driven power transients and time-varying converter input impedance $Z_{in}(f)$. To eliminate this visibility gap, I derived initial reduced-order state-space dynamic equations for a three-stage converter system (AC/DC rectifier, DC-DC buck stage, and UPS battery buffer) and structured a stochastic AI workload profile generator using Python and SimPy. 
-
-The main unresolved issue is establishing the optimal mathematical model complexity that preserves critical switching non-linearities without causing computational intractability during large-scale grid dynamic simulations. My immediate next step is formulating explicit input-output interfaces and testable requirements for Assignment 2.
-=======
 During Assignment 1, I refined the project focus from general grid telemetry transport delays to the dynamic electrical impact of hyperscale AI data center power electronics on electric grid stability. Literature synthesis revealed that regional grid operators rely on static ZIP load models, which fail to capture rapid, workload-driven power transients and time-varying converter input impedance $Z_{in}(f)$. To eliminate this visibility gap, I derived initial reduced-order state-space dynamic equations for a three-stage converter system (AC/DC rectifier, DC-DC buck stage, and UPS battery buffer) and structured a stochastic AI workload profile generator using Python and SimPy.
 
 The main unresolved issue is establishing the optimal model complexity that preserves critical switching non-linearities without causing computational intractability in grid-scale simulations. My next step is defining interfaces and testable requirements for Assignment 2.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 **Open question:** Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes to induce voltage sags?
 
@@ -74,11 +64,7 @@ Under current operational protocols, data center power interactions proceed thro
 
 ##### Operational workflow diagram
 
-<<<<<<< HEAD
-![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](workflow_context.png)
-=======
 ![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](ai_load_to_grid_workflow.png)
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 *Figure 1. Operational workflow linking AI cluster workload scheduling transients ($\Delta P_{compute}$), multi-stage converter regulation ($\Delta V, \Delta I, Z_{in}$), and utility PCC grid interface stability ($V_{PCC}, f_{PCC}$).*
 
@@ -124,220 +110,62 @@ To maintain feasibility within a single-student academic project, the scope deli
 ---
 
 #### 2 Requirements and system specification
-<<<<<<< HEAD
-<!-- Scheduled for Deliverable 2 (Commit: November 13, 2026; Presentation: November 16, 2026). -->
-
-| ID | Required behavior and conditions | Acceptance check | Design and test reference |
-| ------ | ------ | ------ | ------ |
-| F1 | Stochastic AI workload profile generation | SimPy process produces time-series power transients matching MMPP distribution | Scheduled for Deliverable 2 |
-| C1 | State-space converter model stability rule | Real part of system matrix eigenvalues $Re(\lambda_i) < 0$ across operating points | Scheduled for Deliverable 2 |
-| Q1 | Terminal impedance calculation execution speed | Derive $Z_{in}(f)$ across 0.1 Hz–10 kHz in < 5 seconds for 1000 time steps | Scheduled for Deliverable 2 |
-
-**Inputs and outputs:** *Work to come in Deliverable 2.*  
-**Assumptions:** *Work to come in Deliverable 2.*  
-**Constraints:** *Work to come in Deliverable 2.*  
-=======
 
 **Work to come — due Friday, November 13, 2026 (Deliverable 2; presentation November 16).** I will specify 3–5 functional requirements, at least one correctness rule, and one measurable quality target here, each with a concrete acceptance check, plus inputs/outputs examples, assumptions, and constraints.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 3 Alternatives and selected solution
-<<<<<<< HEAD
-<!-- Draft in Deliverable 2; complete in Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
-
-| Approach and source | Useful behavior | Limitation | Evidence or assumption |
-| ------ | ------ | ------ | ------ |
-| Static ZIP Load Baseline | Low computational overhead; supported by legacy grid software | Fails to capture non-linear transients, switching feedback loops, and dynamic impedance $Z_{in}(f)$ | Pratt et al. (2007) [[2](#2-pratt-a-kumar-p--aldridge-t-2007)] |
-| Reduced-Order Dynamic State-Space (Selected) | Accurately models converter control loops, UPS buffering, and dynamic impedance | Requires state-space derivation and parameter tuning for converter stages | Middlebrook (1976) [[1](#1-middlebrook-r-d-1976)] |
-
-![Middlebrook Input Filter Impedance Interaction Criterion graph showing Z_grid(f) intersecting dynamic input impedance Z_in(f)](impedance_resonance.png)
-
-*Figure 2. Middlebrook Impedance Interaction Criterion highlighting the frequency-dependent divergence between dynamic state-space input impedance $Z_{in}(f)$, static ZIP load baseline $Z_{zip}$, and grid source impedance $Z_{grid}(f)$.*
-
-**Choice and reason:** *Work to come in Deliverable 3.*  
-
-##### Decision 1
-**Context and requirement:** Selection of converter model order reduction technique.  
-**Options:** Full non-linear switching model vs. average state-space model.  
-**Decision and reason:** Average state-space model selected for computational tractability during long dynamic sweeps.  
-**Consequences:** Enables fast impedance derivation; high-frequency switching harmonics (>100 kHz) are averaged out.  
-**Status and revisit condition:** Proposed; revisit if switching transients distort low-frequency grid modes.  
-
-##### Decision 2
-**Context and requirement:** Integration of local UPS battery/supercapacitor buffer dynamics.  
-**Options:** Ideal constant voltage source vs. first-order RC energy buffer state model.  
-**Decision and reason:** First-order RC state model selected to capture transient DC-bus voltage dips during compute surges.  
-**Consequences:** Provides accurate state-of-charge (SOC) tracking without full electrochemical cell modeling complexity.  
-**Status and revisit condition:** Proposed; revisit if long-duration thermal degradation alters UPS discharge response.  
-=======
 
 **Work to come — draft begins Friday, November 13, 2026; completed Friday, November 20, 2026 (Deliverable 3; presentation November 23).** I will compare at least two approaches under the same requirements, including a simple baseline, and record the choice with two decision records.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 4 Architectural design
-<<<<<<< HEAD
-<!-- Scheduled for Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
-
-**Boundary and outside participants:** *Work to come in Deliverable 3.*  
-**Main parts and messages:** *Work to come in Deliverable 3.*  
-**Where parts run:** *Work to come in Deliverable 3.*  
-**What I build reuse or simulate:** *Work to come in Deliverable 3.*  
-=======
 
 **Work to come — due Friday, November 20, 2026 (Deliverable 3; presentation November 23).** I will add a context/architecture diagram showing the simulation components, their responsibilities, and labeled data flows.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 5 Component design and interfaces
-<<<<<<< HEAD
-<!-- Scheduled for Deliverable 3 (Commit: November 20, 2026; Presentation: November 23, 2026). -->
-
-| Component | Responsibility | Input | Output or state change |
-| ------ | ------ | ------ | ------ |
-| WorkloadGenerator | Simulates stochastic AI task dispatches | Task arrival rate $\lambda$, burst magnitude $\Delta P$ | Time-series power demand array $P_{compute}(t)$ |
-| ConverterStateSpace | Solves reduced-order dynamic equations | $P_{compute}(t)$, duty cycle $d(t)$ | Bus voltages $V_{DC}(t)$, currents $I(t)$, state vector $x(t)$ |
-| ImpedanceAnalyzer | Computes frequency-dependent input impedance | Dynamic state trajectory $x(t)$, grid frequency $f$ | Input impedance magnitude and phase $Z_{in}(f)$ |
-
-**Critical operation:** *Work to come in Deliverable 3.*  
-**Output:** *Work to come in Deliverable 3.*  
-**Errors:** *Work to come in Deliverable 3.*  
-**Repeated or overlapping calls:** *Work to come in Deliverable 3.*  
-=======
 
 **Work to come — due Friday, November 20, 2026 (Deliverable 3); refined November 27.** I will define the component responsibility table and the interface contract for the critical operation.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 6 Data structure design
-<<<<<<< HEAD
-<!-- Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
-
-| Record or structure | Fields and example values | Relationships and rules | Persistence |
-| ------ | ------ | ------ | ------ |
-| WorkloadProfile | timestamp (float), power_mw (float), job_type (string) | Sequential time ordering; power_mw >= 0 | In-memory CSV array |
-| ConverterState | v_rect (float), v_dc (float), i_ind (float), soc_ups (float) | System differential state vector $x(t)$ | Simulation run output file |
-
-**Ownership:** *Work to come in Deliverable 4.*  
-**Invalid combinations:** *Work to come in Deliverable 4.*  
-**Retention and deletion:** *Work to come in Deliverable 4.*  
-=======
 
 **Work to come — due Friday, November 27, 2026 (Deliverable 4; presentation November 30).** I will define the records for workload profiles, converter state variables, impedance sweep results, and comparison outputs.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 7 Algorithm design and execution
-<<<<<<< HEAD
-<!-- Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
-
-```
-ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqRange)
-    Input check: Validate WorkloadStream is non-empty and ConverterParams matrices are positive definite
-    Step 1: Execute SimPy process to generate time-series power demand P_compute(t)
-    Step 2: Solve state-space system dx/dt = A * x + B * u(t) using SciPy ODE solver
-    Step 3: Linearize state-space system around dynamic operating point (x_0, u_0)
-    Step 4: Compute transfer function H(s) = C * (s*I - A)^(-1) * B + D
-    Step 5: Evaluate Z_in(f) = 1 / H(j * 2 * pi * f) across GridFreqRange
-    Return Z_in_magnitude, Z_in_phase
-```
-
-**Normal sequence:** *Work to come in Deliverable 4.*  
-**Interrupted sequence:** *Work to come in Deliverable 4.*  
-**Overlapping activity:** *Work to come in Deliverable 4.*  
-**Resource estimate:** *Work to come in Deliverable 4.*  
-=======
 
 **Work to come — due Friday, November 27, 2026 (Deliverable 4; presentation November 30).** I will add pseudocode for the simulation pipeline and explain normal and interrupted sequences.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 8 Failures and security
-<<<<<<< HEAD
-<!-- Scheduled for Deliverable 4 (Commit: November 27, 2026; Presentation: November 30, 2026). -->
-
-| Scenario | State that may survive | Expected behavior | Planned check |
-| ------ | ------ | ------ | ------ |
-| Extreme AI power step surge (>50 MW/ms) | DC-bus voltage rail saturation | UPS buffer max discharge engage; warning log issued | Simulation boundary stress test |
-| Numerical integration instability in ODE solver | Last valid state vector $x(t_{valid})$ | Adaptive step size reduction or solver fallback | SciPy solver exception trap |
-
-**Selected adverse case for the prototype:** *Work to come in Deliverable 4.*  
-**Excluded conditions and consequences:** *Work to come in Deliverable 4.*  
-=======
 
 **Work to come — due Friday, November 27, 2026 (Deliverable 4; presentation November 30).** I will list adverse scenarios and misuse cases relevant to a simulation, with expected behavior and planned checks.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 9 Implementation and feasibility
-<<<<<<< HEAD
-<!-- Begin feasibility experiment in Deliverable 3; report implementation status in Deliverables 5–6 (Commit: Dec 4 / Dec 11, 2026). -->
-
-**Minimal path:** Implement 1-stage converter state-space differential equation solver in Python and compare step response against static ZIP load draw.  
-**Feasibility experiment:** *Work to come in Deliverables 3–5.*  
-**Current implementation:** *Phase 1 active (literature synthesis and state-space formulation).*  
-**Run instructions and CI:** *Work to come in Deliverables 5–6.*  
-=======
 
 **Work to come — begins Friday, November 20, 2026; updated December 4 and 11.** I will record the minimal end-to-end path, a feasibility experiment, run instructions, and CI status as the prototype develops.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 10 Testing and verification
-<<<<<<< HEAD
-<!-- Plan in Deliverable 4; add observations in Deliverables 5–6 (Commit: Dec 4 / Dec 11, 2026). -->
-
-| Test and requirement | Setup and procedure | Expected result | Status and evidence |
-| ------ | ------ | ------ | ------ |
-| T1 Normal operation | Inject 10 MW 10-second workload step into 3-stage converter model | Converter voltages stabilize within 50 ms; $Z_{in}(f)$ computed accurately | Planned for Deliverable 5 |
-| T2 Correctness rule | Verify state-space system passivity and energy balance across UPS buffer | Total energy input equals sum of dissipated heat and stored buffer energy | Planned for Deliverable 5 |
-| T3 Off-nominal scenario | Apply 100 Hz workload burst matching LC filter natural frequency | Impedance analyzer detects negative resistance dip and flags resonance | Planned for Deliverable 5 |
-
-**Baseline and comparison question:** *Work to come in Deliverable 5.*  
-**Workload and environment:** *Work to come in Deliverable 5.*  
-**Measurements:** *Work to come in Deliverable 5.*  
-**Actual results:** *Work to come in Deliverable 5.*  
-**Limits and next test:** *Work to come in Deliverable 5.*  
-=======
 
 **Work to come — planned Friday, November 27, 2026; results added December 4 and 11.** I will define tests covering normal operation, a correctness rule, and an adverse scenario before running them.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
 #### 11 Operation maintenance and future work
-<<<<<<< HEAD
-<!-- Draft in Deliverable 4; complete in Deliverable 6 (Commit: December 11, 2026; Presentation: December 14, 2026). -->
-
-**Startup and diagnosis:** *Work to come in Deliverable 6.*  
-**Recovery:** *Work to come in Deliverable 6.*  
-**One future change:** *Work to come in Deliverable 6.*  
-**Update and rollback:** *Work to come in Deliverable 6.*  
-**Responsible design:** *Work to come in Deliverable 6.*  
-
-| Risk | Early sign | Response or fallback |
-| ------ | ------ | ------ |
-| Workload burst rate exceeds solver time step limits | ODE integration convergence failure | Switch to stiff solver (SciPy `Radau` or `BDF`) |
-| Unmodeled switching harmonics distort low-frequency impedance | High-frequency voltage ripples at DC bus | Incorporate second-order parasitic switching model |
-
-| Semester II milestone | Dependency | Completion evidence | Essential or optional |
-| ------ | ------ | ------ | ------ |
-| Interconnect model with IEEE 9-bus grid system | Validated single-converter state-space model | Multi-bus voltage stability simulation runs | Essential |
-| Implement Lyapunov transient stability tool | Multi-bus grid interconnect framework | Dynamic security margin assessment reports | Essential |
-| Synthesize adaptive impedance-matching controller | Impedance resonance analysis engine | Closed-loop oscillation suppression demonstration | Optional |
-=======
 
 **Work to come — drafted Friday, November 27, 2026; completed Friday, December 11, 2026 (Deliverable 6; presentation December 14).** I will add startup/diagnosis instructions, recovery notes, a future change, update/rollback plan, and Semester II milestones.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ---
 
@@ -347,49 +175,17 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 | Revision date | Change to my design | Reason and evidence |
 | ------ | ------ | ------ |
 | November 5, 2026 (Initial) | Initial creation of Section 1 problem research, operational scope, concrete scenario, stakeholder impact table, workflow diagram, progress note, and Section 12 references. | Deliverable 1 submission for CSC 59866 6-week schedule requirement. |
-<<<<<<< HEAD
-| November 6, 2026 (Revision) | Refined Section 1 problem formulation, added Middlebrook impedance interaction diagram (Figure 2), expanded stakeholder links, and updated Section 12 media listings. | Incorporated handbook visual diagram requirements and template alignment. |
-=======
 | November 5, 2026 (Revision) | Refined Section 1 problem formulation, added workflow diagram (Figure 1), expanded stakeholder links, and updated Section 12 media listings. | Incorporated handbook visual diagram requirements and template alignment. |
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ##### Open questions
 | Open question | Why it matters | Next action |
 | ------ | ------ | ------ |
-<<<<<<< HEAD
-| Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes? | Identifies critical oscillation risks and voltage instability points before grid deployment. | Formulate frequency-sweep simulation scenarios in Phase 4 (Deliverable 4/5). |
-=======
 | Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes? | Identifies critical oscillation risks and voltage instability points before grid deployment. | Formulate frequency-sweep simulation scenarios in the prototype phase. |
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
 
 ##### Assistance and reuse
 This design document synthesizes research and state-space modeling formulations authored by Patience Divine Aimee IZERE for CSC 59866. Python code development will reuse open-source libraries including SimPy (v4.1.2), NumPy, SciPy, and Control under standard academic license terms.
 
 ##### References
-<<<<<<< HEAD
-1. <a id="1-middlebrook-r-d-1976"></a>**Middlebrook, R. D.** (1976). "Input Filter Considerations in Design and Application of Switching Regulators." *IEEE Power Electronics Specialists Conference (PESC)*, pp. 366–382.  
-2. <a id="2-pratt-a-kumar-p--aldridge-t-2007"></a>**Pratt, A., Kumar, P., & Aldridge, T.** (2007). "Power Distribution Topologies for Modern Data Centers." *IEEE Transactions on Power Electronics*, vol. 22, no. 3, pp. 1012–1018.  
-3. <a id="3-ieee-power--energy-society-pes-2022"></a>**IEEE Power & Energy Society (PES)** (2022). *IEEE Standard 1547-2018 / IEEE Standard 2800-2022 for Interconnection and Interoperability of Distributed Energy Resources and Large Inverter-Based Resources*. IEEE.  
-4. <a id="4-us-national-science-foundation-nsf-2026"></a>**U.S. National Science Foundation (NSF)** (2026). Directorate for Engineering (ENG), Division of Electrical, Communications, and Computing Systems (ECCS). *Energy, Power, Control, and Learning (EPCL) Program Guidelines*. Solicitation NSF 26-514.  
-5. <a id="5-simpy-development-team-2024"></a>**SimPy Development Team** (2024). *SimPy: Process-based Discrete-Event Simulation Framework in Python (v4.1.2)*. SimPy Documentation.
-
-##### Supporting media and evidence
-* **Workflow Diagram (Figure 1):** `workflow_context.png` — Visual schematic illustrating the sequence from AI cluster workload dispatch through multi-stage power electronic conversion to utility PCC grid interface.
-* **Impedance Interaction Graph (Figure 2):** `impedance_resonance.png` — Technical plot illustrating the Middlebrook input filter impedance interaction criterion, contrasting dynamic state-space impedance $Z_{in}(f)$ against static ZIP models and grid source impedance $Z_{grid}(f)$.
-
-##### Final document check
-* [x] Terms and examples make the project understandable to a beginner.
-* [x] All twelve sections contain project-specific content or clearly marked work to come.
-* [x] Requirements connect to design and tests.
-* [x] Architecture, components, data, and algorithms agree.
-* [x] Targets and plans are separate from observations.
-* [x] Tables, images, pseudocode, references, and evidence links render correctly.
-* [x] Images have alternative text, captions, and readable labels.
-* [x] Run instructions and evidence support reproduction.
-* [x] I am prepared to present my work and orally review the same selected group mate.
-* [x] Remaining work and maintenance needs are explicit.
-* [x] Instructional placeholders are updated for initial submission.
-=======
 1. <a id="1-middlebrook-r-d-1976"></a>**Middlebrook, R. D.** (1976). "Input Filter Considerations in Design and Application of Switching Regulators." *IEEE Power Electronics Specialists Conference (PESC)*, pp. 366–382. https://www.semanticscholar.org/paper/Input-filter-considerations-in-design-and-of-Middlebrook/22397996af080102703615bbf902bfbe48868300  
 2. <a id="2-pratt-a-kumar-p--aldridge-t-2007"></a>**Pratt, A., Kumar, P., & Aldridge, T.** (2007). "Power Distribution Topologies for Modern Data Centers." *IEEE Transactions on Power Electronics*, vol. 22, no. 3, pp. 1012–1018. Journal: https://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=63  
 3. <a id="3-ieee-power--energy-society-pes-2022"></a>**IEEE Power & Energy Society (PES)** (2022). *IEEE Standard 1547-2018 / IEEE Standard 2800-2022 for Interconnection and Interoperability of Distributed Energy Resources and Large Inverter-Based Resources*. IEEE. https://standards.ieee.org/ieee/2800/  
@@ -411,4 +207,3 @@ This design document synthesizes research and state-space modeling formulations 
 * [ ] I am prepared to present my work and orally review the same selected group mate.
 * [ ] Remaining work and maintenance needs are explicit.
 * [ ] Instructional placeholders are removed from the final submission.
->>>>>>> 6974394 (Assignment 1 design document: problem scope and stakeholder analysis)
