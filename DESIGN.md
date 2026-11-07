@@ -2,7 +2,8 @@
 
 **Author:** Patience Divine Aimee IZERE  
 **Course:** CSC 59866  
-**Selected project and option:** Modeling, Analysis, and Control of Data Center Power Electronics Under AI Workload Dynamics 
+**Selected project and option:** Modeling, Analysis, and Control of Data Center Power Electronics Under AI Workload Dynamics
+
 **Current assignment:** 1  
 **Friday commit deadline:** November 6, 2026, at 11:59 p.m. New York time  
 **Monday presentation:** November 9, 2026, at 6:30 p.m. New York time  
@@ -12,7 +13,9 @@
 ---
 
 #### Progress note
-During Assignment 1, I refined the project focus from general grid telemetry transport delays to the dynamic electrical impact of hyperscale AI data center power electronics on electric grid stability. Literature synthesis revealed that regional grid operators rely on static ZIP load models, which fail to capture rapid, workload-driven power transients and time-varying converter input impedance $Z_{in}(f)$. To eliminate this visibility gap, I derived initial reduced-order state-space dynamic equations for a three-stage converter system (AC/DC rectifier, DC-DC buck stage, and UPS battery buffer) and structured a stochastic AI workload profile generator using Python and SimPy. The main unresolved issue is establishing the optimal mathematical model complexity that preserves critical switching non-linearities without causing computational intractability during large-scale grid dynamic simulations. My immediate next step is formulating explicit input-output interfaces and testable requirements for Assignment 2.
+During Assignment 1, I refined the project focus from general grid telemetry transport delays to the dynamic electrical impact of hyperscale AI data center power electronics on electric grid stability. Literature synthesis revealed that regional grid operators rely on static ZIP load models, which fail to capture rapid, workload-driven power transients and time-varying converter input impedance $Z_{in}(f)$. To eliminate this visibility gap, I derived initial reduced-order state-space dynamic equations for a three-stage converter system (AC/DC rectifier, DC-DC buck stage, and UPS battery buffer) and structured a stochastic AI workload profile generator using Python and SimPy. 
+
+The main unresolved issue is establishing the optimal mathematical model complexity that preserves critical switching non-linearities without causing computational intractability during large-scale grid dynamic simulations. My immediate next step is formulating explicit input-output interfaces and testable requirements for Assignment 2.
 
 **Open question:** Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes to induce voltage sags?
 
@@ -37,7 +40,7 @@ During Assignment 1, I refined the project focus from general grid telemetry tra
 #### 1 Problem research and scope
 
 ##### Problem and affected people
-The rapid proliferation of artificial intelligence (AI) training clusters, hyperscale cloud facilities, and high-density compute infrastructure is driving unprecedented localized electricity demand spikes across electric power grids. While data centers represent some of the largest single-point electrical loads connected to transmission and distribution networks, regional transmission operators (RTOs) and independent system operators (ISOs) do not directly observe raw computing task activity. Instead, compute power demand ($\Delta P_{compute}$) is filtered, buffered, and reshaped by internal data center power conversion stages—including AC/DC rectifiers, intermediate DC-DC converters, fast closed-loop feedback controllers, and local energy storage buffers (Uninterruptible Power Supplies and battery/supercapacitor banks)—before reaching the Point of Common Coupling (PCC) at the utility grid interface.
+The rapid proliferation of artificial intelligence (AI) training clusters, hyperscale cloud facilities, and high-density compute infrastructure is driving unprecedented localized electricity demand spikes across electric power grids. While data centers represent some of the largest single-point electrical loads connected to transmission and distribution networks, regional transmission operators (RTOs) and independent system operators (ISOs) do not directly observe raw computing task activity. Instead, compute power demand ($\Delta P_{compute}$) is filtered, buffered, and reshaped by internal data center power conversion stages, including AC/DC rectifiers, intermediate DC-DC converters, fast closed-loop feedback controllers, and local energy storage buffers (Uninterruptible Power Supplies and battery/supercapacitor banks), before reaching the Point of Common Coupling (PCC) at the utility grid interface.
 
 Traditional grid planning, dynamic security assessment, and interconnection tools rely almost exclusively on static or heavily simplified load representations, such as constant impedance ($Z$), constant current ($I$), and constant power ($P$) ZIP load models. These static models assume slow, smooth load variations and fail to capture rapid, workload-driven dynamic load swings, multi-stage power converter feedback loop interactions, and non-linear dynamic impedance characteristics. Consequently, unmodeled dynamic interactions between AI workload spikes and converter control loops create critical operational risks for four primary stakeholder groups:
 
@@ -286,7 +289,7 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 | Revision date | Change to my design | Reason and evidence |
 | ------ | ------ | ------ |
 | November 5, 2026 (Initial) | Initial creation of Section 1 problem research, operational scope, concrete scenario, stakeholder impact table, workflow diagram, progress note, and Section 12 references. | Deliverable 1 submission for CSC 59866 6-week schedule requirement. |
-| November 5, 2026 (Revision) | Refined Section 1 problem formulation, added Middlebrook impedance interaction diagram (Figure 2), expanded stakeholder links, and updated Section 12 media listings. | Incorporated handbook visual diagram requirements and template alignment. |
+| November 6, 2026 (Revision) | Refined Section 1 problem formulation, added Middlebrook impedance interaction diagram (Figure 2), expanded stakeholder links, and updated Section 12 media listings. | Incorporated handbook visual diagram requirements and template alignment. |
 
 ##### Open questions
 | Open question | Why it matters | Next action |
@@ -294,7 +297,7 @@ ALGORITHM CALCULATE_DYNAMIC_IMPEDANCE(WorkloadStream, ConverterParams, GridFreqR
 | Under what workload burst frequencies do converter feedback loops resonate with grid sub-synchronous modes? | Identifies critical oscillation risks and voltage instability points before grid deployment. | Formulate frequency-sweep simulation scenarios in Phase 4 (Deliverable 4/5). |
 
 ##### Assistance and reuse
-This design document synthesizes research and state-space modeling formulations authored by Patience Izere for CSC 59866. Python code development will reuse open-source libraries including SimPy (v4.1.2), NumPy, SciPy, and Control under standard academic license terms.
+This design document synthesizes research and state-space modeling formulations authored by Patience Divine Aimee IZERE for CSC 59866. Python code development will reuse open-source libraries including SimPy (v4.1.2), NumPy, SciPy, and Control under standard academic license terms.
 
 ##### References
 1. <a id="1-middlebrook-r-d-1976"></a>**Middlebrook, R. D.** (1976). "Input Filter Considerations in Design and Application of Switching Regulators." *IEEE Power Electronics Specialists Conference (PESC)*, pp. 366–382.  
