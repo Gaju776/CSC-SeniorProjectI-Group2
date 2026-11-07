@@ -44,10 +44,14 @@ The rapid proliferation of artificial intelligence (AI) training clusters, hyper
 
 Traditional grid planning, dynamic security assessment, and interconnection tools rely almost exclusively on static or heavily simplified load representations, such as constant impedance ($Z$), constant current ($I$), and constant power ($P$) ZIP load models. These static models assume slow, smooth load variations and fail to capture rapid, workload-driven dynamic load swings, multi-stage power converter feedback loop interactions, and non-linear dynamic impedance characteristics. Consequently, unmodeled dynamic interactions between AI workload spikes and converter control loops create critical operational risks for four primary stakeholder groups:
 
-* **Grid Operators (ISOs / RTOs):** Suffer from severe visibility blind spots regarding dynamic voltage stability margins, unexpected tripping of grid protection relays, and unpredicted sub-synchronous or super-synchronous transient oscillations.
-* **Data Center Facility Engineers:** Experience uncharacterized electrical interactions that cause thermal stress on conversion stages, harmonic distortion, transient voltage sags across internal DC buses, and unexpected UPS trip events.
-* **Electric Utilities & Regulators:** Face profound uncertainty during interconnection feasibility and impact studies, forcing them to enforce overly conservative interconnection limits, delay approval timelines, or mandate load curtailment.
-* **Computing & AI System Architects:** Lack grid-side electrical constraint visibility when designing job schedulers, leading to unexpected job execution delays, cluster peak power curtailment, or operational inefficiencies.
+##### Stakeholder impact analysis
+
+| Stakeholder Group | Primary Challenge / Risk | Operational Consequence of Unmodeled Dynamics | Research Solution & Reference Link |
+| ------ | ------ | ------ | ------ |
+| **Grid Operators (ISOs / RTOs)** | Lack of dynamic load models for hyperscale data centers. | Incorrect voltage/frequency stability margins, unexpected tripping of grid protection relays, and unpredicted transient oscillations. | Supplies dynamic state-space load models and impedance profiles $Z_{in}(f)$ for dynamic security assessment [[1](#1-middlebrook-r-d-1976)] |
+| **Data Center Facility Engineers** | Uncharacterized interactions between compute bursts and internal power infrastructure. | Thermal stress on conversion stages, harmonic distortion, transient voltage sags across internal DC buses, and unexpected UPS trip events. | Identifies internal converter resonances and stress points to optimize UPS buffering and control tuning [[2](#2-pratt-a-kumar-p--aldridge-t-2007)] |
+| **Electric Utilities & Regulators** | Uncertainty during interconnection feasibility and impact studies. | Conservative interconnect limits, delayed approval timelines for data center interconnections, or risk of load curtailment. | Provides standardized dynamic impact evaluation tools that streamline interconnection approvals [[3](#3-ieee-power--energy-society-pes-2022)] |
+| **Computing & AI System Architects** | Ignorance of grid-side electrical constraints when designing job schedulers. | Job execution delays, curtailment of cluster peak power capability, or operational inefficiency. | Delivers power-aware feedback to workload schedulers, aligning GPU cluster bursts with grid limits [[4](#4-us-national-science-foundation-nsf-2026)] |
 
 ##### Current workflow
 Under current operational protocols, data center power interactions proceed through a sequence of uncoupled stages:
@@ -58,6 +62,12 @@ Under current operational protocols, data center power interactions proceed thro
 4. **Utility Grid Model Evaluation:** Utility energy management systems evaluate grid stability using static ZIP load models, assuming constant power draw or static impedance.
 
 **The Failure Point:** Because static ZIP models ignore converter closed-loop bandwidths and energy buffer dynamics, they treat the data center as a passive static load block. In reality, fast closed-loop voltage regulation causes the converter input impedance $Z_{in}(f)$ to exhibit negative incremental resistance characteristics at low frequencies. When AI workload burst frequencies align with converter control bandwidths or grid network resonance modes, the unmodeled dynamic impedance triggers severe voltage sags and electrical oscillations at the PCC that utility operators cannot predict or prevent.
+
+##### Operational workflow diagram
+
+![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](workflow_context.png)
+
+*Figure 1. Operational workflow linking AI cluster workload scheduling transients ($\Delta P_{compute}$), multi-stage converter regulation ($\Delta V, \Delta I, Z_{in}$), and utility PCC grid interface stability ($V_{PCC}, f_{PCC}$).*
 
 ##### Concrete scenario
 A hyperscale data center hosting a 50,000-GPU cluster initiates a synchronous pipeline-parallel LLM training iteration. Within 5 milliseconds, compute power demand ramps by 20 MW. As server-side voltage drops, the fast closed-loop controllers of intermediate DC-DC converters increase current draw to maintain constant power delivered to the GPUs. Simultaneously, the central AC/DC rectifier draws a heavy step-current from the utility substation, while the facility's supercapacitor/UPS buffer kicks in to stabilize the internal 48V DC bus.
@@ -78,7 +88,7 @@ Because the regional grid operator's dynamic security software models the data c
 * *Assumption 3 (Converter Model Order Reduction):* High-frequency switching dynamics (>100 kHz) are averaged over control switching periods to yield computationally tractable state-space dynamic models.
 
 ##### Six-week contribution (Semester I scope)
-During this 14-week semester (specifically the 6-week deliverable execution path), I will investigate and demonstrate a reduced-order mathematical and computational model in Python. Specifically, I will build:
+During the 6-week deliverable execution path, I will investigate and demonstrate a reduced-order mathematical and computational model in Python. Specifically, I will build:
 
 1. A stochastic AI workload profile generator using **SimPy** to simulate bursty GPU cluster power demand transients ($\Delta P_{compute}$).
 2. A reduced-order dynamic state-space model in **NumPy/SciPy/Control** representing a 3-stage power conversion system (AC/DC rectifier, DC-DC converter, and UPS energy storage buffer).
@@ -97,21 +107,6 @@ To maintain feasibility within a single-student academic project, the scope deli
 * Physical fabrication or hardware testing of silicon power semiconductor devices (MOSFETs/IGBTs).
 * Thermal dynamics and computational fluid dynamics (CFD) modeling of server room cooling and HVAC infrastructure.
 * Multi-year transmission expansion planning and regional energy policy modeling.
-
-##### Operational workflow diagram
-
-![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](workflow_context.png)
-
-*Figure 1. Operational workflow linking AI cluster workload scheduling transients ($\Delta P_{compute}$), multi-stage converter regulation ($\Delta V, \Delta I, Z_{in}$), and utility PCC grid interface stability ($V_{PCC}, f_{PCC}$).*
-
-##### Stakeholder impact analysis
-
-| Stakeholder Group | Primary Challenge / Risk | Operational Consequence of Unmodeled Dynamics | Research Solution & Reference Link |
-| ------ | ------ | ------ | ------ |
-| **Grid Operators (ISOs / RTOs)** | Lack of dynamic load models for hyperscale data centers. | Incorrect voltage/frequency stability margins, unexpected tripping of grid protection relays, and unpredicted transient oscillations. | Supplies dynamic state-space load models and impedance profiles $Z_{in}(f)$ for dynamic security assessment [[1](#1-middlebrook-r-d-1976)] |
-| **Data Center Facility Engineers** | Uncharacterized interactions between compute bursts and internal power infrastructure. | Thermal stress on conversion stages, harmonic distortion, transient voltage sags across internal DC buses, and unexpected UPS trip events. | Identifies internal converter resonances and stress points to optimize UPS buffering and control tuning [[2](#2-pratt-a-kumar-p--aldridge-t-2007)] |
-| **Electric Utilities & Regulators** | Uncertainty during interconnection feasibility and impact studies. | Conservative interconnect limits, delayed approval timelines for data center interconnections, or risk of load curtailment. | Provides standardized dynamic impact evaluation tools that streamline interconnection approvals [[3](#3-ieee-power--energy-society-pes-2022)] |
-| **Computing & AI System Architects** | Ignorance of grid-side electrical constraints when designing job schedulers. | Job execution delays, curtailment of cluster peak power capability, or operational inefficiency. | Delivers power-aware feedback to workload schedulers, aligning GPU cluster bursts with grid limits [[4](#4-us-national-science-foundation-nsf-2026)] |
 
 ---
 
