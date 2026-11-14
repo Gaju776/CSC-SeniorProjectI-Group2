@@ -63,7 +63,7 @@ Under current operational protocols, data center power interactions proceed thro
 
 ##### Operational workflow diagram
 
-![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](assets/ai_load_to_grid_workflow.png)
+![Workflow diagram linking AI workload scheduling transients through multi-stage power electronics to PCC grid interface stability](ai_load_to_grid_workflow.png)
 
 *Figure 1. Operational workflow linking AI cluster workload scheduling transients ($\Delta P_{\text{compute}}$), multi-stage converter regulation ($\Delta V, \Delta I, Z_{\text{in}}$), and utility Point of Common Coupling grid interface stability ($V_{\text{PCC}}, f_{\text{PCC}}$).*
 
