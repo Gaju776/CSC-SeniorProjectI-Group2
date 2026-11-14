@@ -2,7 +2,7 @@
 
 **Author:** Patience Divine Aimee IZERE  
 **Course:** CSC 59866  
-**Selected project and option:** Modeling, Analysis, and Control of Data Center Power Electronics Under AI Workload Dynamics
+**Selected project and option:** Modeling, Analysis, and Control of Data Center Power Electronics Under AI Workload Dynamics  
 **Current assignment:** 2  
 **Friday commit deadline:** November 13, 2026, at 11:59 p.m. New York time  
 **Monday presentation:** November 16, 2026, at 6:30 p.m. New York time  
