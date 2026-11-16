@@ -1,6 +1,6 @@
 # Source-Version Traceability for Search Over Changing Public Documents
 
-Mohammed Miad · CSC 59866 · Problem A09 · Assignment 1
+Mohammed Miad · CSC 59866 · Problem A09 · Assignment 2
 
 ## Progress note
 
@@ -35,11 +35,14 @@ Two terms come up often below. Provenance means the recorded history of where da
 
 ### 1.2 Who is affected
 
+### 1.2 Who is affected
+
 | Person | What they are trying to do | What goes wrong today |
 |---|---|---|
 | Searcher | Find information across the combined collection | A result may point to a page that no longer says what the result says |
 | Staff member checking results | Confirm a result's origin before anyone relies on it | No record of the document version or processing version behind the result |
 | Pipeline operator | Keep collection and processing running, and rerun failed steps | Can't tell which documents a failed step already finished |
+| Staff relying on AI-extracted fields | Use the fields the model pulled out, such as a date, without rereading every document | No record of which model and prompt produced a field, or which document version it read |
 
 The searcher and the staff member come from the Problem A09 description; the specific kinds of searcher (a researcher, an analyst, a student) are my assumption. The operator is my addition, since whoever reruns a failed step decides whether the history survives. In the prototype, the operator is me. The websites that publish the documents are outside the system: the pipeline has no say over when they change something.
 
