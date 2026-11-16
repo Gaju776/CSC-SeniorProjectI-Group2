@@ -79,18 +79,23 @@ The last row is a partial failure. The coordinator sees a failed task, but half 
 
 ### 1.6 What supports this
 
-The handbook asks for each piece of evidence to be labeled by kind. Nothing here is observed yet; the first observations will come from the prototype.
+The handbook asks for each piece of evidence to be labeled by type. Nothing here is observed yet; the first observations will come from the prototype.
 
-| Statement | Kind | Source |
+| Statement | Evidence type | Source |
 |---|---|---|
-| A federal research call describes a need to manage and transform data from multiple sources | Documented | FBI Enterprise BAA problem sets, Attachment A [1] |
+| A federal research call seeks AI that supports a semi-automated extract-transform-load process, including selecting, tagging, and transforming collected data | Documented | FBI problem sets, section 1.2 [1] |
+| The same call wants answers that describe connections in the data up to the time they were requested, drawn from non-duplicated sources with accurate sourcing | Documented | FBI problem sets, section 1.8 [1] |
 | Provenance is the derivation history of data starting from its original sources, and existing systems differ in how they record it | Documented | Simmhan, Plale, and Gannon [2] |
 | Airflow coordinates pipeline steps and can rerun failed tasks | Documented | Airflow documentation [3], [4] |
 | Airflow leaves the choice of what document history to keep to the pipeline | My reading of [3] and [4] | — |
+| Airflow's Common AI provider can run a model call as a pipeline task and return typed, structured output | Documented | Airflow blog [5] |
+| The provider logs token usage and tool calls, and agent tasks record the name of the model that answered | Documented | Airflow blog [5], [6] |
+| Its durable execution keeps a per-task journal so a retry replays completed model steps instead of calling the model again | Documented | Airflow blog [6] |
+| None of these records ties an AI output to the document version it read | My reading of [5] and [6] | — |
 | Links to source versions really do get lost in a pipeline like this | Assumed; my prototype will test it | — |
 | Staff need the exact document version, not only the web address | Assumed from the Problem A09 description | — |
 
-The research call shows a related need exists. This project works with public documents and is not being built for that agency.
+The research call shows a related need exists, and section 1.8 in particular describes the same goal as this project: point-in-time answers with no duplicates and accurate sourcing. This project works with public documents and is not being built for that agency.
 
 ### 1.7 Approaches that exist today
 
