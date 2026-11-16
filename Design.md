@@ -35,8 +35,6 @@ Two terms come up often below. Provenance means the recorded history of where da
 
 ### 1.2 Who is affected
 
-### 1.2 Who is affected
-
 | Person | What they are trying to do | What goes wrong today |
 |---|---|---|
 | Searcher | Find information across the combined collection | A result may point to a page that no longer says what the result says |
@@ -52,14 +50,9 @@ The pipeline runs in six steps. It collects documents from each source, cleans t
 
 Three of those steps are where the trail breaks. Collecting a document a second time after the source edited it can overwrite the stored copy, so older results now point to text that is gone. Rerunning a step that crashed halfway can process some documents twice, miss others, or lose track of which code version produced the output. And if the model or prompt in the AI step changes, the same document can come out with different fields, with nothing recording which combination produced which answer.
 
-Flow diagram: public sources A and B feed five steps, collect, clean and convert, AI extraction, index, and search. A staff member checks a search result by tracing it back to its source. Three red markers show where the trail breaks: a source editing a document after collection, a processing step crashing after 50 of 100 documents and being rerun, and the model or prompt in the AI step changing between runs.
+![Flow diagram: public sources A and B feed five steps, collect, clean and convert, AI extraction, index, and search. A staff member checks a search result by tracing it back to its source. Three red markers show where the trail breaks: a source editing a document after collection, a processing step crashing after 50 of 100 documents and being rerun, and the model or prompt in the AI step changing between runs.](assets/workflow.png)
 
-Figure 1. The pipeline workflow, with the three points where a result loses its link to its source. Editable source: assets/workflow-source.mmd.
-
------------------------------------------------------------------------------------------------------------------------------------------------------------
-![Flow diagram: public sources A and B feed four steps, collect, clean and convert, index, and search. A staff member checks a search result by tracing it back to its source. Two red markers show where the trail breaks: a source editing a document after collection, and a processing step crashing after 50 of 100 documents and being rerun.](assets/workflow.svg)
-
-*Figure 1. The pipeline as it runs today, with the two points where a result loses its link to its source. Editable source: [assets/workflow-source.mmd](assets/workflow-source.mmd).*
+*Figure 1. The pipeline workflow, with the three points where a result loses its link to its source. Editable source: [assets/workflow-source.mmd](assets/workflow-source.mmd).*
 
 ### 1.4 An example
 
@@ -79,10 +72,10 @@ Chapter 1 of the handbook asks for four things in any project: a caller, a respo
 |---|---|
 | Who makes a request? | A coordinator that starts a processing task |
 | Who responds? | A worker that processes a batch of documents |
-| What information is saved? | Processed text in the index, plus whatever records the pipeline keeps about each document |
-| When might a response not arrive? | The worker crashes after writing 50 of 100 documents, before reporting back |
+| What information is saved? | Processed text and AI-extracted fields in the index, plus whatever records the pipeline keeps about each document |
+| When might a response not arrive? | The worker crashes after writing 50 of 100 documents, before reporting back; or a call to the model service times out |
 
-The last row is a partial failure. The coordinator sees a failed task, but half the output already sits in the store. As with a timeout, the failure tells the coordinator nothing about what was saved, so the pipeline has to record enough for a retry to separate finished work from unfinished work. The sources add a second difficulty: they change documents on their own schedule without telling the pipeline.
+The last row is a partial failure. The coordinator sees a failed task, but half the output already sits in the store. As with a timeout, the failure tells the coordinator nothing about what was saved, so the pipeline has to record enough for a retry to separate finished work from unfinished work. The sources add a second difficulty: they change documents on their own schedule without telling the pipeline. The model service adds a third. It is an outside participant reached over the network, its calls can time out, and a timed-out call says nothing about whether the model produced an answer.
 
 ### 1.6 What supports this
 
