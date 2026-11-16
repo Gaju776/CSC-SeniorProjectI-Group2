@@ -124,7 +124,7 @@ This section states what the pipeline must do, not how. Requirement IDs use thre
 
 Draft:
 
-## 3.1 The two approaches
+### 3.1 The two approaches
 
 A. Scheduled batch with one record per run (the baseline). At a fixed time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
 
