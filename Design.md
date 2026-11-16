@@ -122,7 +122,63 @@ The prototype uses two public sources with one search task. I have not picked th
 This section states what the pipeline must do, not how. Requirement IDs use three letters from the handbook: F for a functional requirement (something the pipeline does), C for a correctness rule (something that must never go wrong), and Q for a quality target (how well it must perform). The acceptance checks are planned procedures; none has been run yet.
 
 ### 2.1 Requirements
+
+| ID | Requirement | Acceptance check |
 |---|---|---|
+| F1 | When the pipeline collects a document whose content differs from the last stored copy, it saves the new content as a new document version and keeps the earlier versions | Collect a test document, edit it, and collect again; two versions are stored and the first is unchanged |
+| F2 | The pipeline converts each document version to plain text and records which version of the cleaning code produced it | Process one document version and inspect the record; it names the document version and the code version |
+| F3 | The AI step extracts a fixed set of fields (topic, key dates, organizations named) from each document version and records the document version it read, the model it used, and the version of the prompt | Run the AI step on one document version and inspect the stored fields; all three are recorded |
+| F4 | A search returns results that each name their source address, document version, collection time, and processing version, including the model and prompt for any AI-extracted field | Run a query that matches a known document; every field in the result is filled in and matches the stored records |
+| C1 | After any processing step is interrupted and retried, each document version appears exactly once in that step's output and exactly once in the index | Stop the cleaning step after 50 of 100 documents, retry it, then count entries per document version in its output and in the index; every count is exactly 1 |
+| C2 | A result or AI-extracted field always refers to the document version and processing version that actually produced it. A later edit at the source, or a change of model or prompt, never changes what an existing output refers to | Index a document, edit it at the source, collect again, and switch the model; the original result still names version 1 and the original model, and the new outputs name version 2 or the new model |
+| Q1 | **Proposed, not measured.** On the documented local setup, a full run over 100 documents with provenance records takes at most 25% longer than the same pipeline that stores no history, with model call time counted in both | Run both pipelines three times on the same 100 documents and compare total run time; a failed run counts as a miss, not as a run to drop |
+
+F1 to F4 follow the pipeline from collection to search. C1 is the rule from my original open question, and it is the rule most likely to separate the two approaches in Section 3. C2 covers both of the ways a link can silently point at the wrong thing: an edited source and a changed model. Q1 matters because recording history is only useful if it does not make the pipeline too slow to run; 25% is a starting value that I expect to revise once I measure the baseline.
+
+### 2.2 An ordinary example
+
+A document from source A is collected on Monday and becomes version 1. The cleaning step and the AI step process it, and a search for "effective date" returns this result:
+
+```json
+{
+  "source": "https://example-source-a.gov/guidance/page-12",
+  "document_version": "page-12@v1",
+  "collected_at": "2026-11-16T09:00:00-05:00",
+  "text_produced_by": "cleaner v0.3",
+  "fields": {
+    "topic": "reporting requirements",
+    "effective_date": "2025-07-01",
+    "organizations": ["Agency X"]
+  },
+  "fields_produced_by": {"model": "model-a", "prompt": "extract-v1"}
+}
+```
+
+The address, model name, and values are invented placeholders; the real sources and model are not chosen yet. A staff member can see exactly which version of the page this came from and what produced each part of it.
+
+### 2.3 Unsuccessful cases
+
+The AI step calls the model for a document, and the call times out. The pipeline does not know whether the model produced an answer, so it records the AI step for that document version as not finished and indexes no fields for it. The retry then calls the model again for that document only. The search result for that document shows its text without AI fields rather than showing fields with no recorded origin.
+
+The cleaning step crashes after 50 of 100 documents. Under C1, the retry must finish the other 50 without creating a second entry for any of the first 50. A pipeline that cannot tell which 50 finished fails this case: it either duplicates them or skips some.
+
+### 2.4 Assumptions
+
+| Assumption | How I will check it |
+|---|---|
+| The two chosen sources stay reachable for the length of the project | Collect from both at least once a week and record any failures |
+| A changed document can be detected by comparing its content with the stored copy | Edit a test document and confirm the comparison flags it; see the open question about what counts as a change |
+| Saved records survive restarting the pipeline | Stop and restart Airflow after a run and confirm the records are still there |
+| The same model and prompt can return different fields for the same document | Run the AI step twice on one document and compare the output |
+| For testing, one source can be a local copy I control, so I can edit a document on demand | Set up the local copy before the first test |
+
+### 2.5 Constraints
+
+- Only public data, with no personal information.
+- The prototype must run on my own laptop.
+- The Common AI provider 1.0 needs Airflow 2.11 or later and Python 3.11 or later [6], [7].
+- The AI step needs a model to call: either a paid service through an API key, or a free model running locally, such as through Ollama, which the provider supports [5].
+- Six weeks and two sources, as set in Section 1.8.
 
 ## 3 Alternatives and selected solution
 
