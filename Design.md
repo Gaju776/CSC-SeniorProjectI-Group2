@@ -182,13 +182,39 @@ The cleaning step crashes after 50 of 100 documents. Under C1, the retry must fi
 
 ## 3 Alternatives and selected solution
 
-Draft:
+*Draft. The final choice and two decision records follow in Assignment 3.*
 
 ### 3.1 The two approaches
 
-A. Scheduled batch with one record per run (the baseline). At a fixed time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
+**A. Scheduled batch with one record per run (the baseline).** At a fixed time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
 
-B. Per-document pipeline with per-document records. Each document version moves through the steps on its own. Every output (cleaned text, AI fields, index entry) is saved with a record that names the document version, the step, the processing version, and whether that step finished for that document. A retry checks these records and skips work that is already finished.
+**B. Per-document pipeline with per-document records.** Each document version moves through the steps on its own. Every output (cleaned text, AI fields, index entry) is saved with a record that names the document version, the step, the processing version, and whether that step finished for that document. A retry checks these records and skips work that is already finished.
+
+### 3.2 Comparison against the requirements
+
+| Requirement | A. Scheduled batch | B. Per-document records | Basis |
+|---|---|---|---|
+| F1 Keep earlier versions | Does not meet it as described, since each run overwrites the stored copy | Meets it; each version is stored under its own name | My judgment |
+| F2, F3 Record what produced each output | Records it once per run, which is correct only if nothing changes mid-run | Records it on every output | My judgment |
+| F4 Results name their document version | Can name the run, but not which version of a document the result came from | Can name the document version directly | My judgment, using the batch limitation noted in Section 1.7 |
+| C1 No duplicates or gaps after a retry | Meets it only by discarding the run's partial output and redoing everything, which repeats every model call | Meets it by skipping documents already recorded as finished | My judgment; to be tested |
+| C2 Edits and model changes don't rewrite history | Fails after an edit, because the old copy is overwritten | Meets it, because old outputs keep their own records | My judgment, supported by [2] |
+| Q1 Run-time overhead | Lowest; one record per run | Higher; one record per output, per step | My judgment; to be measured |
+| Effort to build | Small | Larger; needs a record store and skip-if-finished logic | My judgment |
+
+### 3.3 What the sources support
+
+The provenance survey [2] supports approach B's main idea. It distinguishes recording history as data is produced from reconstructing it afterward, and reconstruction needs the original data to still exist. An edited web page removes the original, so recording at collection time is the option that can satisfy C2.
+
+The Airflow documentation [3], [4] supports both approaches equally. Airflow can schedule a batch and rerun a failed task, but rerunning a task does not decide what happens to output the task already wrote, which is exactly what C1 is about.
+
+The Common AI provider posts [5], [6] matter for the AI step in either approach. Durable execution replays completed model steps on a retry within one task [6], which could reduce the cost of approach A's redo or approach B's retry. It does not record which document version an output came from, so it does not satisfy F3 or C2 by itself.
+
+FBI section 1.8 [1] asks for non-duplicated sources with accurate sourcing, which corresponds to C1 and C2. Those are the two rules on which the approaches differ most.
+
+### 3.4 Early reading
+
+Approach A fails C2 and meets C1 only at a high cost, so it serves mainly as the baseline for Q1. Approach B looks more likely to meet the requirements, but that depends on whether keeping the per-document records is fast enough, which is the open part of Q1. Assignment 3 will make the choice and record the reasons.
 
 ## 4 Architectural design
 
