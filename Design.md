@@ -107,14 +107,15 @@ Airflow's Common AI provider offers a third relevant approach for the AI step. I
 
 ### 1.8 Scope
 
-The prototype uses two public sources with one search task. I have not picked the sources yet; they need to be public, change over time, and hold no personal information. The question is which details each processed document must carry (likely candidates are its source address, document version, processing version, and whether processing finished) for every result to stay traceable after one document changes and one processing step is interrupted on purpose and retried. The prototype passes if every result names its correct document version and processing version, with nothing missing or repeated.
+The prototype uses two public sources with one search task. I have not picked the sources yet; they need to be public, change over time, and hold no personal information. The question is which details each processed document and each AI output must carry (likely candidates are its source address, document version, processing version including the model and prompt, and whether processing finished) for every result to stay traceable after one document changes and one processing step is interrupted on purpose and retried. The prototype passes if every result and every AI-extracted field names its correct document version and processing version, with nothing missing or repeated.
 
 | Six-week prototype | Semester II | Not part of this project |
 |---|---|---|
 | Two public sources, one search task | Interruptions at more points in the pipeline | Search quality or ranking |
+| One AI extraction step whose fields record the model, prompt, and document version | AI-written answers that cite the document versions they used, and human review of AI output | Training or fine-tuning models, or judging how accurate the AI output is |
 | One document edited at its source | Sources that change repeatedly | A user interface beyond the command line |
-| One processing step interrupted and retried | A lookup that shows the full trail for any result | AI or machine learning features |
-| Check that each result names its document version and processing version | Measuring the storage and time cost of the records against a pipeline that keeps no history | More than two sources, private data, large scale, disk loss or corrupted sources, authentication |
+| One processing step interrupted and retried | A lookup that shows the full trail for any result | More than two sources, private data, large scale |
+| Check that each result names its document version and processing version | Measuring the storage and time cost of the records against a pipeline that keeps no history | Disk loss or corrupted sources, authentication |
 
 ## 2 Requirements and system specification
 
