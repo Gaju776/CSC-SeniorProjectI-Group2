@@ -99,9 +99,11 @@ The research call shows a related need exists, and section 1.8 in particular des
 
 ### 1.7 Approaches that exist today
 
-The Problem A09 description names two ways of running such a pipeline. A *scheduled batch* processes a group of documents together at fixed times. One record can describe the whole run, but it can't say which document version led to a particular result. A *per-document pipeline* handles each document as it arrives and can keep a record for each one, at the cost of more records that must stay consistent with each other.
+The Problem A09 description names two ways of running such a pipeline. A scheduled batch processes a group of documents together at fixed times. One record can describe the whole run, but it can't say which document version led to a particular result. A per-document pipeline handles each document as it arrives and can keep a record for each one, at the cost of more records that must stay consistent with each other.
 
-The provenance survey [2] adds a distinction between storing history alongside the data and reconstructing it later from the output. Reconstruction only works while the original source data still exists, which is exactly what an edited web page takes away. My reading is that changing sources mean history has to be recorded when a document is collected. Section 3 will compare these approaches against the requirements.
+The provenance survey [2] adds a distinction between storing history alongside the data and reconstructing it later from the output. Reconstruction only works while the original source data still exists, which is exactly what an edited web page takes away. My reading is that changing sources mean history has to be recorded when a document is collected.
+
+Airflow's Common AI provider offers a third relevant approach for the AI step. Its durable execution records each completed model and tool step in a journal kept for the task instance, and on retry it replays recorded steps until it reaches one whose request has changed [6]. That avoids paying for repeated model calls during a retry, but it is scoped to one task's retries, not to the documents flowing through the pipeline. It does not say which document version an output came from, and the post notes that replay records results rather than effects, so steps with side effects still need to be safe to repeat. Section 3 will compare these approaches against the requirements.
 
 ### 1.8 Scope
 
