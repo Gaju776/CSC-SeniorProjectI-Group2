@@ -255,7 +255,7 @@ Not yet written. Drafted in Assignment 4 and finished in Assignment 6 (December 
 | Date | What changed | Why |
 |---|---|---|
 | 11/06/2026 | First version: problem and scope, workflow figure, tables, progress note, sources | Assignment 1 |
-| 11/16/2026 | Added an AI extraction step to the pipeline; moved AI from the exclusions into scope; added a third failure point (model or prompt changes) to Figure 1; added evidence from FBI sections 1.2 and 1.8 and Airflow's Common AI provider | Made sure that the project explained the AI components, since the FBI problem set calls for them |
+| 11/16/2026 | Added an AI extraction step to the pipeline; moved AI from the exclusions into scope; added a third failure point (model or prompt changes) to Figure 1; added evidence from FBI sections 1.2 and 1.8 and Airflow's Common AI provider | Made sure that the project explained the AI components, since the FBI problem set calls for them, and the Professor mentioned my project should focus on it when I presented my project proposal |
 | 11/16/2026 | Wrote Section 2 (requirements, examples, assumptions, constraints) and drafted Section 3 (scheduled batch versus per-document pipeline) | Assignment 2 |
 
 ### Open questions
@@ -269,20 +269,6 @@ Not yet written. Drafted in Assignment 4 and finished in Assignment 6 (December 
 2. Simmhan, Y. L., Plale, B., and Gannon, D. (2005). "A Survey of Data Provenance in e-Science." *ACM SIGMOD Record*, 34(3), 31–36. <https://doi.org/10.1145/1084805.1084812>
 3. Apache Software Foundation. "What is Airflow?" Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/index.html>. Accessed [date].
 4. Apache Software Foundation. "Architecture Overview." Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/overview.html>. Accessed [date].
-5. Naik, K., and Gopidesu, P. K. (2026, April 14). "Introducing the Common AI Provider: LLM and AI Agent Support for Apache Airflow." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider/>. Accessed November 16, 2026.
-6. Naik, K. (2026, October 19). "Airflow AI Provider 1.0: Agents, Sandboxes, Human Approval and Smarter Retries." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider-1.0/>. Accessed November 16, 2026.
-7. Apache Software Foundation. "apache-airflow-providers-common-ai." Provider documentation. <https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html>. Accessed November 16, 2026.
-
-### Open questions
-
-- If a processing step fails after finishing some of its documents, what must already be saved so the retry neither repeats nor drops any document and still records the processing version? This is the core of the project; Assignment 2 will turn it into a correctness rule.
-
-### Sources
-
-1. Federal Bureau of Investigation. *FBI Enterprise Broad Agency Announcement: Problem Sets* (Attachment A). <https://biz.fbi.gov/broad-agency-announcement-baa/fbi-enterprise-baa-problem-sets>. Accessed 11/06/26.
-2. Simmhan, Y. L., Plale, B., and Gannon, D. (2005). "A Survey of Data Provenance in e-Science." *ACM SIGMOD Record*, 34(3), 31–36. <https://doi.org/10.1145/1084805.1084812>
-3. Apache Software Foundation. "What is Airflow?" Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/index.html>. Accessed 11/06/26.
-4. Apache Software Foundation. "Architecture Overview." Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/overview.html>. Accessed 11/06/26.
 5. Naik, K., and Gopidesu, P. K. (2026, April 14). "Introducing the Common AI Provider: LLM and AI Agent Support for Apache Airflow." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider/>. Accessed November 16, 2026.
 6. Naik, K. (2026, October 19). "Airflow AI Provider 1.0: Agents, Sandboxes, Human Approval and Smarter Retries." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider-1.0/>. Accessed November 16, 2026.
 7. Apache Software Foundation. "apache-airflow-providers-common-ai." Provider documentation. <https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html>. Accessed November 16, 2026.
