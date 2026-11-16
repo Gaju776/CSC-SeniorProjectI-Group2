@@ -4,9 +4,9 @@ Mohammed Miad · CSC 59866 · Problem A09 · Assignment 1
 
 ## Progress note
 
-started from Problem A09, traceable retrieval across public document sources, and narrowed it to a single question about a small document pipeline: what has to be saved so a search result can still be traced to its source document version and processing version after a source edits the document or a processing step crashes and is rerun? Reading about Apache Airflow taught me that a workflow tool can rerun failed tasks but leaves the choice of what history to keep to the pipeline, and that choice is what this project studies. I have not yet settled how a rerun should handle a step that finished some documents before failing. Next, for Assignment 3, I will write testable requirements and compare a scheduled batch with a per-document pipeline.
+This week I revised Section 1 to include AI components, since the FBI problem set calls for them. The pipeline now has an AI extraction step, built on Airflow's Common AI provider, and AI output is a third thing that has to stay traceable. I also wrote the first specification in Section 2 and drafted a comparison of a scheduled batch and a per-document pipeline in Section 3. Writing the correctness rules showed me the baseline can avoid duplicates after a crash only by redoing the whole run, which repeats every model call. The main unresolved issue is how to decide that a document has a new version. Next, for Assignment 3, I will choose an approach, record two decisions, and sketch the architecture.
 
-**Open question.** If a processing step fails after finishing some of its documents, what must already be saved so that the retry neither repeats nor drops any document and still records which processing version produced each one?
+**Open question.** What should count as a new document version: any change to the page's content, or only a change in its text once it is cleaned?
 
 ## Contents
 
@@ -27,9 +27,11 @@ started from Problem A09, traceable retrieval across public document sources, an
 
 ### 1.1 The problem in brief
 
-For someone searching a collection built from several public websites, a result is only useful if they can check where it came from. Staff who verify results need to know which source it came from, which version of the document, when it was collected, and which version of the processing code turned it into searchable text. That trail breaks when a source edits a document after it was collected, or when a processing step crashes partway and is run again. The result is a search hit nobody can verify, or one that shows up twice or not at all. This project investigates what a small pipeline needs to record about each document so the trail survives both events.
+For someone searching a collection built from several public websites, a result is only useful if they can check where it came from. Staff who verify results need to know which source it came from, which version of the document, when it was collected, and which version of the processing code turned it into searchable text. The pipeline also uses an AI step: a language model reads each cleaned document and pulls out structured fields, such as its topic, key dates, and the organizations it names, so search can work on those fields as well as the raw text. That makes the trail longer. An AI-extracted field depends on the document version it read, the model that produced it, and the prompt it was given, and a different model or a changed prompt can give a different answer for the same document.
 
-Two terms come up often below. *Provenance* means the recorded history of where data came from and what was done to it [2]. A *document version* is one particular state of a document; the same web address can serve different versions over time.
+The trail breaks in three ways: a source edits a document after it was collected, a processing step crashes partway and is run again, or the model or prompt changes between runs. The result is a search hit nobody can verify, or one that shows up twice or not at all. This project investigates what a small pipeline needs to record about each document and each AI output so the trail survives all three.
+
+Two terms come up often below. Provenance means the recorded history of where data came from and what was done to it [2]. A document version is one particular state of a document; the same web address can serve different versions over time.
 
 ### 1.2 Who is affected
 
@@ -43,10 +45,15 @@ The searcher and the staff member come from the Problem A09 description; the spe
 
 ### 1.3 How the work happens today
 
-A basic search pipeline over public documents runs in five steps. It collects documents from each source, cleans them and converts them to plain text, adds the text to a search index, answers user queries from that index, and, when someone questions a result, a staff member traces it back to the source.
+The pipeline runs in six steps. It collects documents from each source, cleans them and converts them to plain text, runs an AI extraction step that pulls structured fields out of each document, adds the text and fields to a search index, answers user queries from that index, and, when someone questions a result, a staff member traces it back to the source.
 
-Two of those steps are where the trail breaks. Collecting a document a second time after the source edited it can overwrite the stored copy, so older results now point to text that is gone. Rerunning a cleaning step that crashed halfway can process some documents twice, miss others, or lose track of which code version produced the text.
+Three of those steps are where the trail breaks. Collecting a document a second time after the source edited it can overwrite the stored copy, so older results now point to text that is gone. Rerunning a step that crashed halfway can process some documents twice, miss others, or lose track of which code version produced the output. And if the model or prompt in the AI step changes, the same document can come out with different fields, with nothing recording which combination produced which answer.
 
+Flow diagram: public sources A and B feed five steps, collect, clean and convert, AI extraction, index, and search. A staff member checks a search result by tracing it back to its source. Three red markers show where the trail breaks: a source editing a document after collection, a processing step crashing after 50 of 100 documents and being rerun, and the model or prompt in the AI step changing between runs.
+
+Figure 1. The pipeline workflow, with the three points where a result loses its link to its source. Editable source: assets/workflow-source.mmd.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
 ![Flow diagram: public sources A and B feed four steps, collect, clean and convert, index, and search. A staff member checks a search result by tracing it back to its source. Two red markers show where the trail breaks: a source editing a document after collection, and a processing step crashing after 50 of 100 documents and being rerun.](assets/workflow.svg)
 
 *Figure 1. The pipeline as it runs today, with the two points where a result loses its link to its source. Editable source: [assets/workflow-source.mmd](assets/workflow-source.mmd).*
@@ -58,6 +65,8 @@ Two of those steps are where the trail breaks. Collecting a document a second ti
 On Monday the pipeline collects 100 documents from two public sites, one of them a guidance page on site A. Halfway through cleaning, after 50 documents, the step crashes and the operator reruns it. Rerunning everything indexes those 50 documents a second time, and they appear twice in search results. Rerunning only "the rest" goes wrong a different way: nothing recorded which 50 were finished, so some are skipped and never reach the index.
 
 On Thursday, site A changes the effective date on the guidance page from 2025 to 2026, and the next collection overwrites the stored copy. Later, a staff member looks at a result saying the rule takes effect in 2025, opens the page, and sees 2026. There is no record of which version of the page the result came from or which processing version produced its text, so there is no way to tell whether the result was ever right.
+
+The following week, the operator switches the AI step to a different model. Rerun on the same document version, the new model extracts the effective date from a different paragraph and records it differently. Both answers now sit in the index, and nothing says which model produced which.
 
 ### 1.5 Where the distributed systems difficulty is
 
@@ -106,11 +115,20 @@ The prototype uses two public sources with one search task. I have not picked th
 
 ## 2 Requirements and system specification
 
-Not yet written. Due with Assignment 2 (November 13). Will cover functional requirements, at least one correctness rule, a measurable quality target, assumptions, and constraints, each with an ID and an acceptance check.
+This section states what the pipeline must do, not how. Requirement IDs use three letters from the handbook: F for a functional requirement (something the pipeline does), C for a correctness rule (something that must never go wrong), and Q for a quality target (how well it must perform). The acceptance checks are planned procedures; none has been run yet.
+
+### 2.1 Requirements
+|---|---|---|
 
 ## 3 Alternatives and selected solution
 
-Not yet written. A comparison of the scheduled batch and per-document approaches is due with Assignment 2 (November 13); the selected design and two decision records follow in Assignment 3 (November 20).
+Draft:
+
+## 3.1 The two approaches
+
+A. Scheduled batch with one record per run (the baseline). At a fixed time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
+
+B. Per-document pipeline with per-document records. Each document version moves through the steps on its own. Every output (cleaned text, AI fields, index entry) is saved with a record that names the document version, the step, the processing version, and whether that step finished for that document. A retry checks these records and skips work that is already finished.
 
 ## 4 Architectural design
 
