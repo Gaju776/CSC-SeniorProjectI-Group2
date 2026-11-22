@@ -158,9 +158,17 @@ The address, model name, and values are invented placeholders; the real sources 
 
 ### 2.3 Unsuccessful cases
 
-The AI step calls the model for a document, and the call times out. The pipeline does not know whether the model produced an answer, so it records the AI step for that document version as not finished and indexes no fields for it. The retry then calls the model again for that document only. The search result for that document shows its text without AI fields rather than showing fields with no recorded origin.
+Model timeout. The AI step calls the model for a document, and the call times out. The pipeline does not know whether the model produced an answer, so it marks that output identity as pending and indexes no fields for it. The retry calls the model again for that identity only. Until then, the search result shows the document's text without AI fields rather than showing fields with no recorded origin.
 
-The cleaning step crashes after 50 of 100 documents. Under C1, the retry must finish the other 50 without creating a second entry for any of the first 50. A pipeline that cannot tell which 50 finished fails this case: it either duplicates them or skips some.
+Crash halfway through cleaning. The cleaning step saves item 50 of 100 and crashes before reporting completion. Under C1, the retry must finish the other 50 without creating a second output for any of the first 50. A pipeline that cannot tell which 50 finished fails this case: it either duplicates them or skips some.
+
+Mixed-version retry, using document D7 version 2:
+
+The AI step runs with model M1 and saves D7/v2/clean-0.3/M1/extract-v1, marked complete.
+The active model is switched to M2. The next run starts D7/v2/clean-0.3/M2/extract-v1, and the model call times out. That output is marked pending and has no fields.
+The retry calls M2 again for that identity only. It succeeds, and the same identity is marked complete. No second M2 output is created, and the M1 output is untouched.
+
+Afterwards two outputs exist for D7 version 2, one per model, each exactly once, which is what C1 requires. Search returns the M2 output because M2 is the active model (F5). The M1 output remains as history and can still be looked up by its identity (C2).
 
 ### 2.4 Assumptions
 
