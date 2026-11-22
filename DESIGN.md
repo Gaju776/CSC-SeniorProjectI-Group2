@@ -247,8 +247,28 @@ Reconsider if. Staff turn out to need only the current output, or storage from r
 ## 4 Architectural design
 
 ### 4.1 Context
+--- 
 
+### 4.2  Running Parts
+
+----
+
+### 4.3 Communication
+
+The Airflow scheduler starts a run on a schedule, and the worker runs the tasks in order: collect, clean, AI extract, index. Tasks pass only small values between each other, such as lists of document IDs and identities, through XCom, Airflow's store for small values passed between tasks [6]. Text, fields, and records go through the provenance store, not XCom. The AI extract task sends cleaned text to the model service over the network through the Common AI provider and gets typed fields back [5]. The search CLI reads the search index and the provenance store directly and does not go through Airflow.
+
+### 4.4 Saved state
+
+The provenance store is the authority on which outputs exist and whether each one finished. Airflow's own database is the authority on whether a task run finished, which is not the same thing: a task can fail after half its documents are complete, and only the provenance store knows which half. This difference is the reason for Decision 1. The search index is derived from the provenance store and can be rebuilt from it, and the fixture is read-only during runs.
+
+The provenance store is a single shared dependency. If it cannot be written, no step can mark anything complete, so the task fails and Airflow retries it later. That stops the pipeline, but it never produces a result with a false or missing record.
+
+### 4.5 Built, reused, and simulated
+Built: the fixture builder, the four task bodies, the provenance tables, the identity and skip-if-complete logic, the search CLI, and the failure injector.
+Reused: Airflow for scheduling, ordering, and task retries; the Common AI provider for the model call and typed output; SQLite for storage and full-text search; the model itself; and the Wikipedia and eCFR content.
+Simulated: a source edit, by switching from an older to a newer saved revision; a crash, by the failure injector stopping the clean task after item 50; and a model timeout, by the injector or a short time limit.
 Everything in the prototype runs on my laptop. The table lists who and what sits outside that boundary.
+
 ## 5 Component design and interfaces
 
 Not yet written. Due with Assignment 3 (November 20). Will describe the responsibilities inside each part and the contract for the most important operation.
