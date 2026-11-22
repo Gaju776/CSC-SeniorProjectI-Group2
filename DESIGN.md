@@ -210,13 +210,13 @@ The Common AI provider posts [5], [6] matter for the AI step in either approach.
 
 FBI section 1.8 [1] asks for non-duplicated sources with accurate sourcing, which corresponds to C1 and C2. Those are the two rules on which the approaches differ most.
 
-###3.4 Selected solution
+### 3.4 Selected solution
 
 I selected configuration B: per-document records keyed by output identity, with runs still started on a schedule by Airflow. Of the two, it is the only one that can meet C2, because configuration A overwrites the stored copy when a source changes. It meets C1 by skipping identities already marked complete, where A can only meet it by discarding the partial output and redoing the whole run, including every model call. The cost is more records and more code, and the open risk is Q1: if writing one record per output per step adds too much time, B misses its quality target. Configuration A stays in the project as the baseline that Q1 is measured against.
 
 The two decision records below follow the context, options, choice, and consequences format the handbook recommends [11].
 
-###3.5 Decision 1: Record granularity
+### 3.5 Decision 1: Record granularity
 
 Context and requirement. C1 needs to know, after a crash, which documents a step finished. C2 and F1 need old versions and their outputs kept. Airflow records whether a task finished, not which documents inside it did.
 
@@ -230,7 +230,7 @@ Consequences. There are more records, every step needs a skip-if-complete check,
 
 Reconsider if. The median overhead in Q1 is well over 25% and cannot be reduced, or the project grows past what a single SQLite file on a laptop can handle.
 
-###3.6 Decision 2: Output identity and current versus history
+### 3.6 Decision 2: Output identity and current versus history
 
 Context and requirement. Assignment 2 feedback pointed out that F3 keeps outputs from several models for the same document version, while C1 said each document version appears exactly once. Both cannot be true under the old wording.
 
@@ -244,9 +244,9 @@ Consequences. Storage grows with each model or prompt change. Search needs an ex
 
 Reconsider if. Staff turn out to need only the current output, or storage from repeated model changes becomes a problem.
 
-##4 Architectural design
+## 4 Architectural design
 
-###4.1 Context
+### 4.1 Context
 
 Everything in the prototype runs on my laptop. The table lists who and what sits outside that boundary.
 ## 5 Component design and interfaces
