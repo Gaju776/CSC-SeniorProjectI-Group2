@@ -4,21 +4,21 @@ Mohammed Miad · CSC 59866 · Problem A09 · Assignment 2
 
 ## Progress note
 
-This week I revised Section 1 to include AI components, since the FBI problem set calls for them. The pipeline now has an AI extraction step, built on Airflow's Common AI provider, and AI output is a third thing that has to stay traceable. I also wrote the first specification in Section 2 and drafted a comparison of a scheduled batch and a per-document pipeline in Section 3. Writing the correctness rules showed me the baseline can avoid duplicates after a crash only by redoing the whole run, which repeats every model call. The main unresolved issue is how to decide that a document has a new version. Next, for Assignment 3, I will choose an approach, record two decisions, and sketch the architecture.
+This week I worked through the Assignment 2 feedback and chose a design. I redefined an output's identity so that a retry and a model change no longer conflict in C1, added a mixed-version example, gave Q1 a pass rule, and named the two sources: Wikipedia article revisions and eCFR regulation versions. I selected per-document provenance records, with runs still started on a schedule by Airflow, and recorded two decisions on record granularity and output identity. Sections 4 and 5 now show the running parts and the contract for the extraction step, and Section 9 sets up a small experiment on the retry rule. I learned that Airflow can tell me a task failed, but only my own records can say which documents inside it finished. The main unresolved issue is how search picks the current output. Next I will define the records and algorithms.
 
-**Open question.** What should count as a new document version: any change to the page's content, or only a change in its text once it is cleaned?
+**Open question.** When one document version has AI outputs from several models or prompts, should search show only the active one, or let staff ask for a specific one?
 
 ## Contents
 
-1. [Problem research and scope](#1-problem-research-and-scope)
-2. [Requirements and system specification](#2-requirements-and-system-specification)
-3. [Alternatives and selected solution](#3-alternatives-and-selected-solution)
-4. [Architectural design](#4-architectural-design)
-5. [Component design and interfaces](#5-component-design-and-interfaces)
-6. [Data structure design](#6-data-structure-design)
-7. [Algorithm design and execution](#7-algorithm-design-and-execution)
-8. [Failures and security](#8-failures-and-security)
-9. [Implementation and feasibility](#9-implementation-and-feasibility)
+1.  [Problem research and scope](#1-problem-research-and-scope)
+2.  [Requirements and system specification](#2-requirements-and-system-specification)
+3.  [Alternatives and selected solution](#3-alternatives-and-selected-solution)
+4.  [Architectural design](#4-architectural-design)
+5.  [Component design and interfaces](#5-component-design-and-interfaces)
+6.  [Data structure design](#6-data-structure-design)
+7.  [Algorithm design and execution](#7-algorithm-design-and-execution)
+8.  [Failures and security](#8-failures-and-security)
+9.  [Implementation and feasibility](#9-implementation-and-feasibility)
 10. [Testing and verification](#10-testing-and-verification)
 11. [Operation maintenance and future work](#11-operation-maintenance-and-future-work)
 12. [Revision history and references](#12-revision-history-and-references)
@@ -182,8 +182,6 @@ The cleaning step crashes after 50 of 100 documents. Under C1, the retry must fi
 
 ## 3 Alternatives and selected solution
 
-*Draft. The final choice and two decision records follow in Assignment 3.*
-
 ### 3.1 The two approaches
 
 **A. Scheduled batch with one record per run (the baseline).** At a fixed time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
@@ -212,14 +210,45 @@ The Common AI provider posts [5], [6] matter for the AI step in either approach.
 
 FBI section 1.8 [1] asks for non-duplicated sources with accurate sourcing, which corresponds to C1 and C2. Those are the two rules on which the approaches differ most.
 
-### 3.4 Early reading
+###3.4 Selected solution
 
-Approach A fails C2 and meets C1 only at a high cost, so it serves mainly as the baseline for Q1. Approach B looks more likely to meet the requirements, but that depends on whether keeping the per-document records is fast enough, which is the open part of Q1. Assignment 3 will make the choice and record the reasons.
+I selected configuration B: per-document records keyed by output identity, with runs still started on a schedule by Airflow. Of the two, it is the only one that can meet C2, because configuration A overwrites the stored copy when a source changes. It meets C1 by skipping identities already marked complete, where A can only meet it by discarding the partial output and redoing the whole run, including every model call. The cost is more records and more code, and the open risk is Q1: if writing one record per output per step adds too much time, B misses its quality target. Configuration A stays in the project as the baseline that Q1 is measured against.
 
-## 4 Architectural design
+The two decision records below follow the context, options, choice, and consequences format the handbook recommends [11].
 
-Not yet written. Due with Assignment 3 (November 20). Will show the system's surroundings, its running parts, what each part saves, and what I build, reuse, or simulate.
+###3.5 Decision 1: Record granularity
 
+Context and requirement. C1 needs to know, after a crash, which documents a step finished. C2 and F1 need old versions and their outputs kept. Airflow records whether a task finished, not which documents inside it did.
+
+Options. (a) One record per run, as in the baseline. (b) Rely on the Common AI provider's durable execution, which keeps a journal of model steps for one task's retries [6]. (c) One record per output, keyed by its identity, kept in the pipeline's own provenance store.
+
+Choice. Option (c).
+
+Reasons. Option (a) cannot meet C2 or name a document version in a result. Option (b) covers only the AI step and only one task's retries, and does not say which document version an output came from. Option (c) is the only one that covers every step and keeps history.
+
+Consequences. There are more records, every step needs a skip-if-complete check, and every step depends on the provenance store. This is the main source of the overhead Q1 measures.
+
+Reconsider if. The median overhead in Q1 is well over 25% and cannot be reduced, or the project grows past what a single SQLite file on a laptop can handle.
+
+###3.6 Decision 2: Output identity and current versus history
+
+Context and requirement. Assignment 2 feedback pointed out that F3 keeps outputs from several models for the same document version, while C1 said each document version appears exactly once. Both cannot be true under the old wording.
+
+Options. (a) Identity is the document version only, and a new model overwrites the old output. (b) Identity is the document ID, document version, cleaning version, model, and prompt version; every distinct identity is kept, and search chooses the current one. (c) Keep only the newest output and write older ones to a separate log.
+
+Choice. Option (b).
+
+Reasons. Option (a) breaks C2, because switching models rewrites what an old result refers to. Option (c) keeps history but splits it across two places that can drift apart. Option (b) makes a retry of the same identity harmless and makes a model change a new, separate output, which removes the conflict.
+
+Consequences. Storage grows with each model or prompt change. Search needs an explicit current-version policy (F5), and the pipeline needs a single setting that names the active model and prompt.
+
+Reconsider if. Staff turn out to need only the current output, or storage from repeated model changes becomes a problem.
+
+##4 Architectural design
+
+###4.1 Context
+
+Everything in the prototype runs on my laptop. The table lists who and what sits outside that boundary.
 ## 5 Component design and interfaces
 
 Not yet written. Due with Assignment 3 (November 20). Will describe the responsibilities inside each part and the contract for the most important operation.
