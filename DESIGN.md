@@ -395,6 +395,8 @@ Not yet written. Due with Assignment 4 (November 27). Will cover adverse scenari
 
 ## 9 Implementation and feasibility
 
+### 9.1 Smallest implementation path
+
 The path starts with one document and grows only after each step works.
 
 A fixture with one Wikipedia article: an older and a newer revision, saved locally.
@@ -404,6 +406,29 @@ Switch to the newer revision and run again. Search returns the newer version, an
 Only then grow the fixture to about 100 documents across both sources and add the failure injector to test C1.
 
 Status: not started. No pipeline exists yet, implementation status will be reported in Assignments 5 and 6. No code exists yet.
+
+### 9.2 Feasibility experiment
+
+Question. Can a uniqueness rule on the output identity, enforced by SQLite, make a crash and retry produce exactly one output per identity with no gaps, while still letting a model change create a separate output? This matters because C1 and Decision 2 both rest on it. If the store cannot enforce it, the skip check has to be built differently.
+
+Procedure.
+
+In SQLite, create a table of outputs whose identity must be unique, set so that inserting an identity that already exists is ignored instead of added [10].
+Insert outputs for documents 1 to 50 with model M1, then stop. This stands in for a crash after item 50.
+Retry by inserting all 100 documents with model M1.
+Count the rows, and count how many times each identity appears.
+Insert document 7 again with model M2.
+Count again.
+
+Expected result, written before running. After step 4, there are 100 rows and each identity appears once. After step 6, there are 101 rows, and document 7 has one M1 row and one M2 row.
+
+Evidence. [I will fill this in after I run the row counts from steps 4 and 6.] 
+
+Finding. [Same as above, will fill in later.]
+
+Resulting decision. If the counts match, the provenance store uses a uniqueness rule on the identity as the mechanism behind C1 and the "already complete" outcome in Section 5.2. If they do not, the store is not enough by itself, and the skip check has to happen in the task code before writing, which Assignment 4 would then design.
+
+Limits. This runs in a single process with no real crash and no Airflow. It tests the store's rule, not the whole retry.
 
 ## 10 Testing and verification
 
@@ -422,18 +447,42 @@ Not yet written. Drafted in Assignment 4 and finished in Assignment 6 (December 
 | 11/06/2026 | First version: problem and scope, workflow figure, tables, progress note, sources | Assignment 1 |
 | 11/16/2026 | Added an AI extraction step to the pipeline; moved AI from the exclusions into scope; added a third failure point (model or prompt changes) to Figure 1; added evidence from FBI sections 1.2 and 1.8 and Airflow's Common AI provider | Made sure that the project explained the AI components, since the FBI problem set calls for them, and the Professor mentioned my project should focus on it when I presented my project proposal |
 | 11/16/2026 | Wrote Section 2 (requirements, examples, assumptions, constraints) and drafted Section 3 (scheduled batch versus per-document pipeline) | Assignment 2 |
+| 11/22/2026 | Revised Sections 1 to 3 in response to feedback (see the table below); named the sources; added F5 | Assignment 1 and 2 feedback |
+| 11/22/2026 | Completed Section 3 with a selection and two decision records; wrote Sections 4 and 5; began Section 9 with the smallest path and a feasibility experiment; added Figure 2 | Assignment 3 |
+
+### Response to feedback
+
+| Feedback | What changed | Where | Status |
+|---|---|---|---|
+| C1 conflicted with keeping outputs from several models for one document version (Assignment 2) | Defined an output identity; C1 now counts identities; added Decision 2 | 2.1, 3.6 | Done |
+| Add a mixed-version retry example (Assignment 2) | Added D7 version 2 with M1, then M2 with a timeout and retry | 2.3, 5.4 | Done |
+| Q1 needed a pass rule for its three runs (Assignment 2) | The median overhead must be at most 25%, and no run may fail | 2.1 | Done |
+| The comparison mixed scheduling with record granularity (Assignment 2) | Reframed around granularity and limited the conclusions to the two configurations | 3.1, 3.4 | Done |
+| Name the two sources (Assignments 1 and 2) | Wikipedia revisions and eCFR versions, saved as a fixture | 1.8, 2.4 | Done |
+| Define the minimum provenance fields (Assignment 1) | Added the field list | 5.3 | Done |
+| The staff workflow was assumed (Assignments 1 and 2) | Added a concrete staff task, labeled as assumed | 1.2 | Done; still unconfirmed with a real staff member |
+| Evidence of how often the failure happens in practice (Assignment 1) | Stated that the prototype shows the failure in a controlled setup only, and that results are synthetic | 1.6 | Unresolved: no operator account or real pipeline example is available |
+| Diagram paths missing in the reviewed version (Assignment 2) | Image files to be committed at the paths the document uses | 1.3, 4.2 | In progress |
+| Filename capitalization (Assignment 2) | Renamed to DESIGN.md | Whole file | Done |
+| The AI exclusion was called a typo in the presentation (Assignment 1) | AI scope is explained as a requirement change, with its cost in Q1 and Decision 2 | 1.1, 1.8, 3.6 | Done |
 
 ### Open questions
 
-- What should count as a new document version: any change to the page's content, or only a change in its text once it is cleaned? This affects F1 and the assumption about detecting changes.
-- *Resolved into a requirement:* what must be saved so a retry neither repeats nor drops a document. This is now correctness rule C1.
+- When one document version has AI outputs from several models or prompts, should search show only the active one, or let staff ask for a specific one?
+- What should search show when the newest document version has no complete AI output yet?
+- *Resolved:* what counts as a new document version. It is the source's own version identifier, with a content hash to catch unchanged text (Section 2 and F1).
+- *Resolved:* what must be saved so a retry neither repeats nor drops a document. This is correctness rule C1, now based on output identity.
 
 ### Sources
 
-1. Federal Bureau of Investigation. *FBI Enterprise Broad Agency Announcement: Problem Sets* (Attachment A). <https://biz.fbi.gov/broad-agency-announcement-baa/fbi-enterprise-baa-problem-sets>. Accessed [date].
+1. Federal Bureau of Investigation. *FBI Enterprise Broad Agency Announcement: Problem Sets* (Attachment A). <https://biz.fbi.gov/broad-agency-announcement-baa/fbi-enterprise-baa-problem-sets>. Accessed 11/06/26.
 2. Simmhan, Y. L., Plale, B., and Gannon, D. (2005). "A Survey of Data Provenance in e-Science." *ACM SIGMOD Record*, 34(3), 31–36. <https://doi.org/10.1145/1084805.1084812>
-3. Apache Software Foundation. "What is Airflow?" Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/index.html>. Accessed [date].
-4. Apache Software Foundation. "Architecture Overview." Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/overview.html>. Accessed [date].
-5. Naik, K., and Gopidesu, P. K. (2026, April 14). "Introducing the Common AI Provider: LLM and AI Agent Support for Apache Airflow." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider/>. Accessed November 16, 2026.
-6. Naik, K. (2026, October 19). "Airflow AI Provider 1.0: Agents, Sandboxes, Human Approval and Smarter Retries." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider-1.0/>. Accessed November 16, 2026.
-7. Apache Software Foundation. "apache-airflow-providers-common-ai." Provider documentation. <https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html>. Accessed November 16, 2026.
+3. Apache Software Foundation. "What is Airflow?" Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/index.html>. Accessed 11/06/26.
+4. Apache Software Foundation. "Architecture Overview." Apache Airflow documentation. <https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/overview.html>. Accessed 11/06/26.
+5. Naik, K., and Gopidesu, P. K. (2026, April 14). "Introducing the Common AI Provider: LLM and AI Agent Support for Apache Airflow." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider/>. Accessed 11/16/26.
+6. Naik, K. (2026, October 19). "Airflow AI Provider 1.0: Agents, Sandboxes, Human Approval and Smarter Retries." Apache Airflow blog. <https://airflow.apache.org/blog/common-ai-provider-1.0/>. Accessed 11/16/26.
+7. Apache Software Foundation. "apache-airflow-providers-common-ai." Provider documentation. <https://airflow.apache.org/docs/apache-airflow-providers-common-ai/stable/index.html>. Accessed 11/16/26.
+8. MediaWiki. "API:Revisions." MediaWiki documentation. <https://www.mediawiki.org/wiki/API:Revisions>. Accessed 11/22/26.
+9. Office of the Federal Register. "eCFR Developer Resources." <https://www.ecfr.gov/reader-aids/ecfr-developer-resources>. Accessed 11/22/26.
+10. SQLite. "The ON CONFLICT Clause." <https://www.sqlite.org/lang_conflict.html>. Accessed 11/22/26.
+11. Microsoft. "Maintain an architecture decision record (ADR)." Azure Well-Architected Framework. <https://learn.microsoft.com/en-us/azure/well-architected/architect-role/architecture-decision-record>. Accessed 11/22/26.
