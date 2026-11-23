@@ -202,15 +202,16 @@ B. Per-document records. Runs start on the same schedule, but every output (clea
 
 ### 3.2 Comparison against the requirements
 
-| Requirement | A. Scheduled batch | B. Per-document records | Basis |
+| Requirement | A. One record per run | B. Per-document records | Basis |
 |---|---|---|---|
-| F1 Keep earlier versions | Does not meet it as described, since each run overwrites the stored copy | Meets it; each version is stored under its own name | My judgment |
+| F1 Keep earlier versions | Does not meet it, since each run overwrites the stored copy | Meets it; each version is stored under its own identifier | My judgment |
 | F2, F3 Record what produced each output | Records it once per run, which is correct only if nothing changes mid-run | Records it on every output | My judgment |
-| F4 Results name their document version | Can name the run, but not which version of a document the result came from | Can name the document version directly | My judgment, using the batch limitation noted in Section 1.7 |
-| C1 No duplicates or gaps after a retry | Meets it only by discarding the run's partial output and redoing everything, which repeats every model call | Meets it by skipping documents already recorded as finished | My judgment; to be tested |
-| C2 Edits and model changes don't rewrite history | Fails after an edit, because the old copy is overwritten | Meets it, because old outputs keep their own records | My judgment, supported by [2] |
-| Q1 Run-time overhead | Lowest; one record per run | Higher; one record per output, per step | My judgment; to be measured |
-| Effort to build | Small | Larger; needs a record store and skip-if-finished logic | My judgment |
+| F4 Results name their document version | Can name the run, but not which version of a document the result came from | Names the document version directly | My judgment, using the batch limitation noted in Section 1.7 |
+| F5 Current output chosen by policy | Only one output per document exists, so there is nothing to choose, but history is lost | Keeps every output; needs an explicit policy to pick the current one | My judgment |
+| C1 Each identity exactly once after a retry | Meets it only by discarding the run's partial output and redoing everything, which repeats every model call | Meets it by skipping identities already marked complete | My judgment; Section 9.2 tests the mechanism |
+| C2 Edits and model changes don't rewrite history | Fails after an edit, because the old copy is overwritten | Meets it, because old outputs keep their own identities | My judgment, supported by [2] |
+| Q1 Run-time overhead | Lowest; one record per run | Higher; one record per output, per step | To be measured |
+| Effort to build | Small | Larger; needs a record store and skip-if-complete logic | My judgment |
 
 ### 3.3 What the sources support
 
