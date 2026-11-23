@@ -395,7 +395,15 @@ Not yet written. Due with Assignment 4 (November 27). Will cover adverse scenari
 
 ## 9 Implementation and feasibility
 
-Not yet written. The plan and a feasibility experiment start in Assignment 3 (November 20); implementation status is reported in Assignments 5 and 6. No code exists yet.
+The path starts with one document and grows only after each step works.
+
+A fixture with one Wikipedia article: an older and a newer revision, saved locally.
+An Airflow DAG with the four tasks, run on the older revision: collect, clean, extract with one model, index.
+The search CLI returns the result with its identity and provenance fields (F3, F4).
+Switch to the newer revision and run again. Search returns the newer version, and the older one can still be looked up (F1, F5, C2).
+Only then grow the fixture to about 100 documents across both sources and add the failure injector to test C1.
+
+Status: not started. No pipeline exists yet, implementation status will be reported in Assignments 5 and 6. No code exists yet.
 
 ## 10 Testing and verification
 
