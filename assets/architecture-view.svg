@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" font-family="Arial, Helvetica, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#333"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c00000"/></marker>
+  </defs>
+  <rect width="1200" height="700" fill="#fff"/>
+  <text x="600" y="34" text-anchor="middle" font-size="22" font-weight="bold" fill="#1f1f1f">Architecture view: running parts, where they run, and saved state</text>
+
+  <!-- Host: operator laptop -->
+  <rect x="20" y="60" width="420" height="560" rx="14" fill="#fafafa" stroke="#7f7f7f" stroke-width="2"/>
+  <text x="40" y="88" font-size="16" font-weight="bold" fill="#333">Runs on: operator laptop</text>
+
+  <rect x="45" y="105" width="370" height="80" rx="10" fill="#f2f2f2" stroke="#7f7f7f" stroke-width="2"/>
+  <text x="230" y="138" text-anchor="middle" font-size="16" font-weight="bold">GCS software (reused)</text>
+  <text x="230" y="161" text-anchor="middle" font-size="13" fill="#444">operator sends commands, sees telemetry</text>
+
+  <line x1="230" y1="187" x2="230" y2="233" stroke="#333" stroke-width="2" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="242" y="215" font-size="12" fill="#444">plain MAVLink, local UDP</text>
+
+  <rect x="45" y="235" width="370" height="200" rx="10" fill="#d9e2f3" stroke="#2f5496" stroke-width="2"/>
+  <text x="230" y="265" text-anchor="middle" font-size="16" font-weight="bold">GCS-side proxy (built)</text>
+  <text x="65" y="293" font-size="13" fill="#333">Protector: encrypts each command</text>
+  <text x="65" y="315" font-size="13" fill="#333">Checker: authenticates and decrypts telemetry</text>
+  <text x="65" y="337" font-size="13" fill="#333">Replay guard: counter + 64-message window</text>
+  <text x="65" y="359" font-size="13" fill="#333">Router: picks the key for each drone ID</text>
+  <text x="65" y="391" font-size="13" fill="#333" font-style="italic">One protected session per drone</text>
+
+  <!-- saved state GCS -->
+  <rect x="45" y="460" width="175" height="140" rx="8" fill="#fff2cc" stroke="#bf9000" stroke-width="1.5"/>
+  <text x="132" y="485" text-anchor="middle" font-size="14" font-weight="bold">Saved state</text>
+  <text x="58" y="510" font-size="12.5">Key table (one key</text>
+  <text x="58" y="527" font-size="12.5">per enrolled drone)</text>
+  <text x="58" y="550" font-size="12.5">Counter file (sent and</text>
+  <text x="58" y="567" font-size="12.5">received, per drone)</text>
+  <rect x="235" y="460" width="180" height="140" rx="8" fill="#fff2cc" stroke="#bf9000" stroke-width="1.5"/>
+  <text x="325" y="485" text-anchor="middle" font-size="14" font-weight="bold">Event log</text>
+  <text x="248" y="510" font-size="12.5">Every rejected message:</text>
+  <text x="248" y="527" font-size="12.5">time, drone, reason</text>
+  <text x="248" y="550" font-size="12.5">(requirement F5)</text>
+  <line x1="132" y1="437" x2="132" y2="458" stroke="#bf9000" stroke-width="2" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="325" y1="437" x2="325" y2="458" stroke="#bf9000" stroke-width="2" marker-end="url(#a)"/>
+
+  <!-- link emulator -->
+  <rect x="500" y="235" width="200" height="200" rx="10" fill="#e2efda" stroke="#548235" stroke-width="2"/>
+  <text x="600" y="265" text-anchor="middle" font-size="16" font-weight="bold">Link emulator (built)</text>
+  <text x="600" y="287" text-anchor="middle" font-size="13" fill="#333">simulates the radio</text>
+  <text x="515" y="317" font-size="13" fill="#333">57.6 kbit/s limit</text>
+  <text x="515" y="339" font-size="13" fill="#333">delay, 10% loss,</text>
+  <text x="515" y="361" font-size="13" fill="#333">late packets</text>
+  <text x="515" y="383" font-size="13" fill="#333">one shared channel</text>
+  <text x="600" y="420" text-anchor="middle" font-size="12" fill="#444">runs on the laptop</text>
+
+  <line x1="417" y1="300" x2="498" y2="300" stroke="#2f5496" stroke-width="4" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="702" y1="300" x2="788" y2="300" stroke="#2f5496" stroke-width="4" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="605" y="196" text-anchor="middle" font-size="13" font-weight="bold" fill="#2f5496">protected frames only</text><text x="605" y="216" text-anchor="middle" font-size="12" fill="#2f5496">(UDP in place of the radio)</text>
+
+  <!-- attacker harness -->
+  <rect x="480" y="490" width="240" height="110" rx="10" fill="#fbe5e5" stroke="#c00000" stroke-width="2" stroke-dasharray="8,6"/>
+  <text x="600" y="520" text-anchor="middle" font-size="15" font-weight="bold" fill="#c00000">Attack test harness (built)</text>
+  <text x="600" y="545" text-anchor="middle" font-size="13" fill="#333">captures, alters, replays,</text>
+  <text x="600" y="565" text-anchor="middle" font-size="13" fill="#333">forges (tests T2 to T9)</text>
+  <line x1="600" y1="488" x2="600" y2="438" stroke="#c00000" stroke-width="2.5" stroke-dasharray="7,5" marker-end="url(#r)"/>
+
+  <!-- Host: drone (stack of 3) -->
+  <rect x="790" y="76" width="390" height="560" rx="14" fill="#fafafa" stroke="#c9c9c9" stroke-width="1.5"/>
+  <rect x="780" y="68" width="390" height="560" rx="14" fill="#fafafa" stroke="#b0b0b0" stroke-width="1.5"/>
+  <rect x="770" y="60" width="390" height="560" rx="14" fill="#fafafa" stroke="#7f7f7f" stroke-width="2"/>
+  <text x="790" y="88" font-size="16" font-weight="bold" fill="#333">Runs on: each drone (1 to 3, simulated)</text>
+  <text x="790" y="108" font-size="12.5" fill="#555">on a real drone: companion computer</text>
+
+  <rect x="790" y="235" width="350" height="200" rx="10" fill="#d9e2f3" stroke="#2f5496" stroke-width="2"/>
+  <text x="965" y="265" text-anchor="middle" font-size="16" font-weight="bold">Drone-side proxy (built)</text>
+  <text x="810" y="293" font-size="13" fill="#333">Checker: authenticates and decrypts</text>
+  <text x="810" y="315" font-size="13" fill="#333">commands; drops bad ones</text>
+  <text x="810" y="337" font-size="13" fill="#333">Replay guard: counter + 64-message</text>
+  <text x="810" y="359" font-size="13" fill="#333">window</text>
+  <text x="810" y="381" font-size="13" fill="#333">Protector: encrypts telemetry</text>
+
+  <rect x="790" y="460" width="165" height="140" rx="8" fill="#fff2cc" stroke="#bf9000" stroke-width="1.5"/>
+  <text x="872" y="485" text-anchor="middle" font-size="14" font-weight="bold">Saved state</text>
+  <text x="803" y="510" font-size="12.5">This drone's key</text>
+  <text x="803" y="533" font-size="12.5">Counter file (sent</text>
+  <text x="803" y="550" font-size="12.5">and received)</text>
+  <rect x="970" y="460" width="170" height="140" rx="8" fill="#fff2cc" stroke="#bf9000" stroke-width="1.5"/>
+  <text x="1055" y="485" text-anchor="middle" font-size="14" font-weight="bold">Event log</text>
+  <text x="983" y="510" font-size="12.5">Rejected commands:</text>
+  <text x="983" y="527" font-size="12.5">time and reason</text>
+  <line x1="872" y1="437" x2="872" y2="458" stroke="#bf9000" stroke-width="2" marker-start="url(#a)" marker-end="url(#a)"/>
+  <line x1="1055" y1="437" x2="1055" y2="458" stroke="#bf9000" stroke-width="2" marker-end="url(#a)"/>
+
+  <line x1="965" y1="187" x2="965" y2="233" stroke="#333" stroke-width="2" marker-start="url(#a)" marker-end="url(#a)"/>
+  <text x="977" y="215" font-size="12" fill="#444">plain MAVLink, local UDP</text>
+  <rect x="790" y="125" width="350" height="60" rx="10" fill="#e2efda" stroke="#548235" stroke-width="2"/>
+  <text x="965" y="152" text-anchor="middle" font-size="16" font-weight="bold">Autopilot simulator (reused)</text>
+  <text x="965" y="173" text-anchor="middle" font-size="13" fill="#444">unchanged; flies the simulated drone</text>
+
+  <!-- legend -->
+  <text x="20" y="652" font-size="13" fill="#333">Blue: built  |  Gray: reused  |  Green: simulated  |  Yellow: saved to disk, survives a restart  |  Red dashed: attacker used in tests</text>
+  <text x="20" y="676" font-size="13" fill="#333">Plain MAVLink never leaves a machine; only protected frames cross the link.</text>
+</svg>
