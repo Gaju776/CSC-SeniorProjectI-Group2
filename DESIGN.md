@@ -8,6 +8,8 @@ This week I worked through the Assignment 2 feedback and chose a design. I redef
 
 **Open question.** When one document version has AI outputs from several models or prompts, should search show only the active one, or let staff ask for a specific one?
 
+**Feedback** After the Assignment 2 feedback, I defined an output's identity so C1 counts identities instead of document versions, which keeps outputs from different models without conflict. I added the mixed-version retry example, gave Q1 a median-of-three pass rule, narrowed the Section 3 comparison to record granularity, named Wikipedia and the eCFR as sources, and listed the minimum provenance fields. How often the failure happens in practice is still unresolved.
+
 ## Contents
 
 1.  [Problem research and scope](#1-problem-research-and-scope)
