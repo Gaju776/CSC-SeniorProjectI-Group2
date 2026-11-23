@@ -179,16 +179,17 @@ Afterwards two outputs exist for D7 version 2, one per model, each exactly once,
 
 | Assumption | How I will check it |
 |---|---|
-| The two chosen sources stay reachable for the length of the project | Collect from both at least once a week and record any failures |
-| A changed document can be detected by comparing its content with the stored copy | Edit a test document and confirm the comparison flags it; see the open question about what counts as a change |
+| Wikipedia and the eCFR stay reachable long enough to build the fixture; after that, tests run from the saved copy | Build the fixture early and confirm every chosen page has two saved versions |
+| A new version can be recognized from the source's version identifier, and a content hash catches a new identifier with unchanged text | Compare two saved revisions of the same page and confirm both the identifier and the hash differ |
+| An older and a newer revision of the same page can stand in for an edit | Confirm that, for each chosen page, the two revisions differ in text that the AI step extracts |
 | Saved records survive restarting the pipeline | Stop and restart Airflow after a run and confirm the records are still there |
 | The same model and prompt can return different fields for the same document | Run the AI step twice on one document and compare the output |
-| For testing, one source can be a local copy I control, so I can edit a document on demand | Set up the local copy before the first test |
 
 ### 2.5 Constraints
 
 - Only public data, with no personal information.
 - The prototype must run on my own laptop.
+- Wikipedia text is licensed under Creative Commons (CC BY-SA), so stored copies keep their source address and attribution.
 - The Common AI provider 1.0 needs Airflow 2.11 or later and Python 3.11 or later [6], [7].
 - The AI step needs a model to call: either a paid service through an API key, or a free model running locally, such as through Ollama, which the provider supports [5].
 - Six weeks and two sources, as set in Section 1.8.
