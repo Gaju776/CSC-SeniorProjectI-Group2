@@ -264,11 +264,34 @@ The two decision records below follow the context, options, choice, and conseque
 ## 4 Architectural design
 
 ### 4.1 Context
---- 
 
-### 4.2  Running Parts
+Everything in the prototype runs on my laptop. The table lists who and what sits outside that boundary.
 
-----
+| Outside participant | What crosses the boundary |
+|---|---|
+| Wikipedia and the eCFR | Chosen revisions, fetched once by the fixture builder. After that, the pipeline reads the saved fixture, not the live sites |
+| Model service | Cleaned text goes out and typed fields come back. The plan is a local model through Ollama; a hosted service through an API key is the fallback |
+| Searcher and staff | Queries go in through a command-line search tool, and results come back with their provenance |
+| Operator (me) | Starts runs, triggers the failure injector, and retries failed runs |
+
+### 4.2 Running parts
+
+![Architecture diagram: Wikipedia and the eCFR feed a fixture builder that saves a read-only fixture on the laptop. An Airflow scheduler and worker run one DAG with four tasks in order: collect, clean, AI extract, and index. Each of the first three tasks reads and writes records in a SQLite provenance store; the AI extract task exchanges text and typed fields with an outside model service; the index task reads complete outputs and writes a SQLite full-text search index. A search command-line tool reads the index and the provenance store and answers the searcher. A failure injector, used only in tests, stops the clean task after item 50. The operator starts and retries runs.](assets/architecture.png)
+
+*Figure 2. The running parts of the prototype, what each one talks to, and where state is saved. Editable source: [assets/architecture-source.mmd](assets/architecture-source.mmd).*
+
+| Part | Responsibility | Saves | Build, reuse, or simulate |
+|---|---|---|---|
+| Fixture builder | Fetches the chosen older and newer revisions from Wikipedia and the eCFR, with their version identifiers | The fixture files | Build; runs once |
+| Airflow scheduler and worker | Starts a run on a schedule, runs the four tasks in order, retries a failed task | Task and run status in Airflow's own database | Reuse |
+| Collect task | Reads the fixture, recognizes new document versions, registers them | Document version records | Build |
+| Clean task | Converts each document version to plain text | Cleaned text under its identity, with status | Build |
+| AI extract task | Calls the model through the Common AI provider and validates the typed fields it returns | Fields under their identity, with status | Reuse the provider; build the record logic |
+| Index task | Writes the current outputs into the search index, following the F5 policy | Index entries | Build, on reused SQLite full-text search |
+| Provenance store | Holds document versions and every output record with its identity and status | All provenance | Reuse SQLite; build the tables |
+| Search CLI | Answers queries and attaches each result's provenance | Nothing | Build |
+| Model service | Runs the language model | Nothing the pipeline relies on | Reuse |
+| Failure injector | Stops the clean task after a set number of items, or forces a model timeout | Nothing | Simulate; tests only |
 
 ### 4.3 Communication
 
@@ -281,14 +304,82 @@ The provenance store is the authority on which outputs exist and whether each on
 The provenance store is a single shared dependency. If it cannot be written, no step can mark anything complete, so the task fails and Airflow retries it later. That stops the pipeline, but it never produces a result with a false or missing record.
 
 ### 4.5 Built, reused, and simulated
-Built: the fixture builder, the four task bodies, the provenance tables, the identity and skip-if-complete logic, the search CLI, and the failure injector.
-Reused: Airflow for scheduling, ordering, and task retries; the Common AI provider for the model call and typed output; SQLite for storage and full-text search; the model itself; and the Wikipedia and eCFR content.
-Simulated: a source edit, by switching from an older to a newer saved revision; a crash, by the failure injector stopping the clean task after item 50; and a model timeout, by the injector or a short time limit.
-Everything in the prototype runs on my laptop. The table lists who and what sits outside that boundary.
+
+- **Built:** the fixture builder, the four task bodies, the provenance tables, the identity and skip-if-complete logic, the search CLI, and the failure injector.
+- **Reused:** Airflow for scheduling, ordering, and task retries; the Common AI provider for the model call and typed output; SQLite for storage and full-text search; the model itself; and the Wikipedia and eCFR content.
+- **Simulated:** a source edit, by switching from an older to a newer saved revision; a crash, by the failure injector stopping the clean task after item 50; and a model timeout, by the injector or a short time limit.
 
 ## 5 Component design and interfaces
 
-Not yet written. Due with Assignment 3 (November 20). Will describe the responsibilities inside each part and the contract for the most important operation.
+### 5.1 Component responsibilities
+
+These components are functions or modules inside the running parts from Section 4, not separate services.
+
+| Component | Lives in | Responsibility | Input | Output or state change |
+|---|---|---|---|---|
+| Version register | Collect task | Decide whether a document version is new and save it | A fixture document and its version identifier | A new document version record, or nothing if already seen |
+| Cleaner | Clean task | Convert a document version to plain text | A document version | Cleaned text saved under its identity |
+| Identity builder | Shared | Build the identity string for an output | IDs, versions, and the active model and prompt | An identity such as `D7/v2/clean-0.3/M1/extract-v1` |
+| Completion recorder | Shared | Mark an identity pending, complete, or failed, and answer whether it is already complete | An identity | A status change |
+| Extractor | AI extract task | Send cleaned text and the prompt to the model and check the returned fields against the expected types | Cleaned text and its identity | Fields saved under the new identity |
+| Indexer | Index task | Write the current output of each document into the search index | Complete outputs and the F5 policy | Index entries |
+| Search policy | Search CLI | Choose the current output for each matching document | A query | Results with provenance |
+| Failure injector | Tests only | Stop a task after a set number of items, or force a timeout | A setting such as "stop after 50" | A simulated crash or timeout |
+
+### 5.2 Critical operation: extract fields for one document version
+
+This operation is linked to F3 (record what produced each field), C1 (exactly one output per identity after a retry), and C2 (old outputs keep their provenance).
+
+| Part of the contract | Description |
+|---|---|
+| Caller | The AI extract task in an Airflow run, once per document version |
+| Input | Document ID, document version, the identity of its cleaned text, the active model, and the active prompt version |
+| Identity | The cleaned text's identity plus the model and prompt version |
+| Normal output | Fields (topic, key dates, organizations named) saved under that identity, marked complete |
+| State changes | Creates at most one output record per identity. Its status moves from pending to complete, or from pending to failed. It never changes another identity's record |
+| Errors | See the outcomes below |
+
+| Outcome | When it happens | State afterwards | What the caller does |
+|---|---|---|---|
+| Complete | The model returns fields that pass the type check | The record is complete and holds the fields | Moves on |
+| Already complete | The identity is already marked complete | Unchanged; the model is not called | Moves on. This is what makes a retry safe |
+| Pending | The model call does not answer in time | The record is pending and holds no fields | Retries this identity later, up to a set number of attempts |
+| Invalid output | The model's answer fails the type check, such as a date field holding "next spring" | The record is failed, with the reason | Retries within the limit, then leaves it failed and reports it |
+| Missing input | The cleaned text for that identity does not exist | Nothing is created | Reports it; the clean step must run first |
+| Store unavailable | The provenance store cannot be written | Nothing is marked complete | The task fails, and Airflow retries the task |
+
+### 5.3 Minimum provenance fields
+
+Assignment 1 feedback asked for the minimum fields a record must hold. Section 6 will define the full records in Assignment 4.
+
+| Field | Example | Why it is needed |
+|---|---|---|
+| Document ID | D17 | Names the document across all its versions |
+| Source address | Wikipedia or eCFR page address | Says where the document came from |
+| Document version | rev-1001 | The source's own version identifier (F1, C2) |
+| Content hash | 3f9a1c | Recognizes a new identifier with unchanged text |
+| Collection time | 2026-11-22 09:00 | When the version was collected |
+| Cleaning version | clean-0.3 | What produced the text (F2) |
+| Model and prompt version | model-a, extract-v1 | What produced the fields (F3) |
+| Status | pending, complete, or failed | Lets a retry skip finished work (C1) |
+| Identity | `D17/rev-1001/clean-0.3/model-a/extract-v1` | The key that makes each output exist once |
+
+### 5.4 Examples
+
+**Success.** Input: D17, revision rev-1001, cleaned text `D17/rev-1001/clean-0.3`, model-a, prompt extract-v1. The model returns a topic, one date, and one organization, all passing the type check. Result: a new record `D17/rev-1001/clean-0.3/model-a/extract-v1`, marked complete, holding those fields.
+
+**Repeated call.** The same input arrives again, as it would on a retry. The identity is already complete, so the outcome is "already complete," the model is not called, and there is still exactly one record.
+
+**Timeout and retry.** The mixed-version case in Section 2.3: D7 version 2 with M2 times out and stays pending, the retry completes the same identity, and the M1 output for D7 version 2 is untouched.
+
+**Invalid output.** The model returns "next spring" for an effective date. The type check rejects it, the record is marked failed with that reason after the allowed attempts, and no fields are indexed for it.
+
+### 5.5 Still being worked out
+
+- Whether the pending record is written before the model call, so a crash during the call leaves a trace, or only after it. This affects C1 and will be settled with the algorithm in Assignment 4.
+- The number of retry attempts and the wait between them.
+- The full record layout and how long old outputs are kept, which belong to Section 6.
+- What search shows when the newest document version has no complete AI output yet: the older complete output, or the text alone.
 
 ## 6 Data structure design
 
