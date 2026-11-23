@@ -219,13 +219,13 @@ B. Per-document records. Runs start on the same schedule, but every output (clea
 
 ### 3.3 What the sources support
 
-The provenance survey [2] supports approach B's main idea. It distinguishes recording history as data is produced from reconstructing it afterward, and reconstruction needs the original data to still exist. An edited web page removes the original, so recording at collection time is the option that can satisfy C2.
+The provenance survey [2] supports configuration B's main idea. It distinguishes recording history as data is produced from reconstructing it afterward, and reconstruction needs the original data to still exist. An edited web page removes the original, so recording at collection time is the option that can satisfy C2.
 
-The Airflow documentation [3], [4] supports both approaches equally. Airflow can schedule a batch and rerun a failed task, but rerunning a task does not decide what happens to output the task already wrote, which is exactly what C1 is about.
+The Airflow documentation [3], [4] supports both configurations equally. Airflow can schedule a run and rerun a failed task, but rerunning a task does not decide what happens to output the task already wrote, which is exactly what C1 is about.
 
-The Common AI provider posts [5], [6] matter for the AI step in either approach. Durable execution replays completed model steps on a retry within one task [6], which could reduce the cost of approach A's redo or approach B's retry. It does not record which document version an output came from, so it does not satisfy F3 or C2 by itself.
+The Common AI provider posts [5], [6] matter for the AI step in either configuration. Durable execution replays completed model steps on a retry within one task [6], which could reduce the cost of a retry. It does not record which document version an output came from, so it does not satisfy F3 or C2 by itself.
 
-FBI section 1.8 [1] asks for non-duplicated sources with accurate sourcing, which corresponds to C1 and C2. Those are the two rules on which the approaches differ most.
+FBI section 1.8 [1] asks for non-duplicated sources with accurate sourcing, which corresponds to C1 and C2. Those are the two rules on which the configurations differ most.
 
 ### 3.4 Selected solution
 
@@ -235,31 +235,31 @@ The two decision records below follow the context, options, choice, and conseque
 
 ### 3.5 Decision 1: Record granularity
 
-Context and requirement. C1 needs to know, after a crash, which documents a step finished. C2 and F1 need old versions and their outputs kept. Airflow records whether a task finished, not which documents inside it did.
+**Context and requirement.** C1 needs to know, after a crash, which documents a step finished. C2 and F1 need old versions and their outputs kept. Airflow records whether a task finished, not which documents inside it did.
 
-Options. (a) One record per run, as in the baseline. (b) Rely on the Common AI provider's durable execution, which keeps a journal of model steps for one task's retries [6]. (c) One record per output, keyed by its identity, kept in the pipeline's own provenance store.
+**Options.** (a) One record per run, as in the baseline. (b) Rely on the Common AI provider's durable execution, which keeps a journal of model steps for one task's retries [6]. (c) One record per output, keyed by its identity, kept in the pipeline's own provenance store.
 
-Choice. Option (c).
+**Choice.** Option (c).
 
-Reasons. Option (a) cannot meet C2 or name a document version in a result. Option (b) covers only the AI step and only one task's retries, and does not say which document version an output came from. Option (c) is the only one that covers every step and keeps history.
+**Reasons.** Option (a) cannot meet C2 or name a document version in a result. Option (b) covers only the AI step and only one task's retries, and does not say which document version an output came from. Option (c) is the only one that covers every step and keeps history.
 
-Consequences. There are more records, every step needs a skip-if-complete check, and every step depends on the provenance store. This is the main source of the overhead Q1 measures.
+**Consequences.** There are more records, every step needs a skip-if-complete check, and every step depends on the provenance store. This is the main source of the overhead Q1 measures.
 
-Reconsider if. The median overhead in Q1 is well over 25% and cannot be reduced, or the project grows past what a single SQLite file on a laptop can handle.
+**Reconsider if.** The median overhead in Q1 is well over 25% and cannot be reduced, or the project grows past what a single SQLite file on a laptop can handle.
 
 ### 3.6 Decision 2: Output identity and current versus history
 
-Context and requirement. Assignment 2 feedback pointed out that F3 keeps outputs from several models for the same document version, while C1 said each document version appears exactly once. Both cannot be true under the old wording.
+**Context and requirement.** Assignment 2 feedback pointed out that F3 keeps outputs from several models for the same document version, while C1 said each document version appears exactly once. Both cannot be true under the old wording.
 
-Options. (a) Identity is the document version only, and a new model overwrites the old output. (b) Identity is the document ID, document version, cleaning version, model, and prompt version; every distinct identity is kept, and search chooses the current one. (c) Keep only the newest output and write older ones to a separate log.
+**Options.** (a) Identity is the document version only, and a new model overwrites the old output. (b) Identity is the document ID, document version, cleaning version, model, and prompt version; every distinct identity is kept, and search chooses the current one. (c) Keep only the newest output and write older ones to a separate log.
 
-Choice. Option (b).
+**Choice.** Option (b).
 
-Reasons. Option (a) breaks C2, because switching models rewrites what an old result refers to. Option (c) keeps history but splits it across two places that can drift apart. Option (b) makes a retry of the same identity harmless and makes a model change a new, separate output, which removes the conflict.
+**Reasons.** Option (a) breaks C2, because switching models rewrites what an old result refers to. Option (c) keeps history but splits it across two places that can drift apart. Option (b) makes a retry of the same identity harmless and makes a model change a new, separate output, which removes the conflict.
 
-Consequences. Storage grows with each model or prompt change. Search needs an explicit current-version policy (F5), and the pipeline needs a single setting that names the active model and prompt.
+**Consequences.** Storage grows with each model or prompt change. Search needs an explicit current-version policy (F5), and the pipeline needs a single setting that names the active model and prompt.
 
-Reconsider if. Staff turn out to need only the current output, or storage from repeated model changes becomes a problem.
+**Reconsider if.** Staff turn out to need only the current output, or storage from repeated model changes becomes a problem.
 
 ## 4 Architectural design
 
