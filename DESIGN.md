@@ -125,8 +125,6 @@ This section states what the pipeline must do, not how. Requirement IDs use thre
 
 ### 2.1 Requirements
 
-### 2.1 Requirements
-
 | ID | Requirement | Acceptance check |
 |---|---|---|
 | F1 | When the pipeline collects a document version it has not seen, it saves it under the source's version identifier and keeps earlier versions | Collect an older revision of a test article, then a newer one; both are stored and the older one is unchanged |
@@ -142,36 +140,38 @@ F1 to F4 follow the pipeline from collection to search, and F5 states which outp
 
 ### 2.2 An ordinary example
 
-A document from source A is collected on Monday and becomes version 1. The cleaning step and the AI step process it, and a search for "effective date" returns this result:
+A Wikipedia article in the fixture is document D17, and its older revision is collected first. The cleaning step and the AI step process it, and a search for an effective date returns this result:
 
 ```json
 {
-  "source": "https://example-source-a.gov/guidance/page-12",
-  "document_version": "page-12@v1",
-  "collected_at": "2026-11-16T09:00:00-05:00",
-  "text_produced_by": "cleaner v0.3",
+  "source": "https://en.wikipedia.org/wiki/Example_article",
+  "document_id": "D17",
+  "document_version": "rev-1001",
+  "content_hash": "3f9a1c",
+  "collected_at": "2026-11-22T09:00:00-05:00",
+  "text_identity": "D17/rev-1001/clean-0.3",
   "fields": {
     "topic": "reporting requirements",
     "effective_date": "2025-07-01",
     "organizations": ["Agency X"]
   },
-  "fields_produced_by": {"model": "model-a", "prompt": "extract-v1"}
+  "fields_identity": "D17/rev-1001/clean-0.3/model-a/extract-v1"
 }
 ```
 
-The address, model name, and values are invented placeholders; the real sources and model are not chosen yet. A staff member can see exactly which version of the page this came from and what produced each part of it.
+The address, revision number, hash, model name, and values are invented placeholders; the real pages and model are not chosen yet. A staff member can see exactly which revision this came from and what produced each part of it.
 
 ### 2.3 Unsuccessful cases
 
-Model timeout. The AI step calls the model for a document, and the call times out. The pipeline does not know whether the model produced an answer, so it marks that output identity as pending and indexes no fields for it. The retry calls the model again for that identity only. Until then, the search result shows the document's text without AI fields rather than showing fields with no recorded origin.
+**Model timeout.** The AI step calls the model for a document, and the call times out. The pipeline does not know whether the model produced an answer, so it marks that output identity as pending and indexes no fields for it. The retry calls the model again for that identity only. Until then, the search result shows the document's text without AI fields rather than showing fields with no recorded origin.
 
-Crash halfway through cleaning. The cleaning step saves item 50 of 100 and crashes before reporting completion. Under C1, the retry must finish the other 50 without creating a second output for any of the first 50. A pipeline that cannot tell which 50 finished fails this case: it either duplicates them or skips some.
+**Crash halfway through cleaning.** The cleaning step saves item 50 of 100 and crashes before reporting completion. Under C1, the retry must finish the other 50 without creating a second output for any of the first 50. A pipeline that cannot tell which 50 finished fails this case: it either duplicates them or skips some.
 
-Mixed-version retry, using document D7 version 2:
+**Mixed-version retry**, using document D7 version 2:
 
-The AI step runs with model M1 and saves D7/v2/clean-0.3/M1/extract-v1, marked complete.
-The active model is switched to M2. The next run starts D7/v2/clean-0.3/M2/extract-v1, and the model call times out. That output is marked pending and has no fields.
-The retry calls M2 again for that identity only. It succeeds, and the same identity is marked complete. No second M2 output is created, and the M1 output is untouched.
+1. The AI step runs with model M1 and saves `D7/v2/clean-0.3/M1/extract-v1`, marked complete.
+2. The active model is switched to M2. The next run starts `D7/v2/clean-0.3/M2/extract-v1`, and the model call times out. That output is marked pending and has no fields.
+3. The retry calls M2 again for that identity only. It succeeds, and the same identity is marked complete. No second M2 output is created, and the M1 output is untouched.
 
 Afterwards two outputs exist for D7 version 2, one per model, each exactly once, which is what C1 requires. Search returns the M2 output because M2 is the active model (F5). The M1 output remains as history and can still be looked up by its identity (C2).
 
