@@ -192,11 +192,13 @@ Afterwards two outputs exist for D7 version 2, one per model, each exactly once,
 
 ## 3 Alternatives and selected solution
 
-### 3.1 The two approaches
+### 3.1 The two configurations compared
 
-**A. Scheduled batch with one record per run (the baseline).** At a fixed time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
+After Assignment 2 feedback, the comparison is framed around record granularity. Both configurations can be started on a schedule by Airflow; scheduling is not what separates them, and a scheduled batch could keep per-document records too. The conclusions below apply only to these two configurations.
 
-**B. Per-document pipeline with per-document records.** Each document version moves through the steps on its own. Every output (cleaned text, AI fields, index entry) is saved with a record that names the document version, the step, the processing version, and whether that step finished for that document. A retry checks these records and skips work that is already finished.
+A. One record per run (the baseline). At a scheduled time, the pipeline collects every document, overwrites the stored copies, cleans them, runs the AI step, and rebuilds the index. It keeps one record per run: when it ran, the code version, and the model and prompt it used. This is the simplest pipeline I could build with Airflow, which already schedules runs and reruns failed tasks [3], [4].
+
+B. Per-document records. Runs start on the same schedule, but every output (cleaned text, AI fields, index entry) is saved under its identity with a status of pending, complete, or failed. Earlier document versions are kept. A retry checks these records and skips identities already marked complete.
 
 ### 3.2 Comparison against the requirements
 
